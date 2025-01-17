@@ -20,7 +20,7 @@ jobs:
       - id: set-matrix
         run: echo "matrix=$(cat build_versions.json | jq -c)" >> $GITHUB_OUTPUT
 
-  build-and-push-container:
+  build-X86-container:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -40,17 +40,64 @@ jobs:
             OPENVOXDB_VERSION=${{ matrix.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
             RUGGED_VERSION=${{ matrix.rugged_version }}
-          build_arch: linux/amd64,linux/arm64
+          build_arch: linux/amd64
           build_context: openvoxserver
           buildfile: openvoxserver/Containerfile
           tags: |
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-latest
-            ghcr.io/openvoxproject/openvoxserver:latest
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
 
-      # - name: Update Docker Hub Description for shortname
-      #   uses: peter-evans/dockerhub-description@v4
-      #   with:
-      #     username: voxpupulibot
-      #     password: ${{ secrets.DOCKERHUB_BOT_PASSWORD }}
-      #     repository: openvoxproject/openvoxserver
+  build-ARM-container:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    needs: setup-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+    steps:
+      - name: Build OpenVox Server ${{ matrix.release }} container
+        uses: voxpupuli/gha-build-and-publish-a-container@v2
+        with:
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          build_args: |
+            OPENVOX_RELEASE=${{ matrix.release }}
+            OPENVOXSERVER_VERSION=${{ matrix.server_version }}
+            OPENVOXAGENT_VERSION=${{ matrix.agent_version }}
+            OPENVOXDB_VERSION=${{ matrix.db_version }}
+            R10K_VERSION=${{ matrix.r10k_version }}
+            RUGGED_VERSION=${{ matrix.rugged_version }}
+          build_arch: linux/arm64
+          build_context: openvoxserver
+          buildfile: openvoxserver/Containerfile
+          tags: |
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64
+
+  create-multiarch-manifests:
+    runs-on: ubuntu-latest
+    needs:
+      - setup-matrix
+      - build-X86-container
+      - build-ARM-container
+    strategy:
+      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+    steps:
+      - name: Log in to the ghcr.io registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create multiarch manifests
+        run: |
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }} \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
+
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-latest \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
+
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:latest \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
