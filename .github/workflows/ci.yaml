@@ -1,0 +1,85 @@
+---
+name: CI🚦
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Source checkout
+        uses: actions/checkout@v4
+
+      - id: set-matrix
+        run: echo "matrix=$(jq -c . build_versions.json)" >> $GITHUB_OUTPUT
+
+  general_ci:
+    uses: voxpupuli/crafty/.github/workflows/general_ci.yaml@main
+    with:
+      shellcheck_scan_dir: './openvoxserver'
+
+  build_test_container:
+    name: 'Build test container'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+      pull-requests: write
+    needs: setup-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          tags: 'ci/openvoxserver:${{ matrix.server_version }}'
+          context: openvoxserver
+          file: openvoxserver/Containerfile
+          push: false
+          build-args: |
+            OPENVOX_RELEASE=${{ matrix.release }}
+            OPENVOXSERVER_VERSION=${{ matrix.server_version }}
+            OPENVOXAGENT_VERSION=${{ matrix.agent_version }}
+            OPENVOXDB_VERSION=${{ matrix.db_version }}
+            R10K_VERSION=${{ matrix.r10k_version }}
+            RUGGED_VERSION=${{ matrix.rugged_version }}
+
+  tests:
+    needs:
+      - general_ci
+      - build_test_container
+    runs-on: ubuntu-latest
+    name: Test suite
+    steps:
+      - run: echo Test suite completed
+
+  dependabot:
+    permissions:
+      contents: write
+    name: 'Dependabot auto-merge'
+    needs:
+      - tests
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'}}
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2.2.0
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

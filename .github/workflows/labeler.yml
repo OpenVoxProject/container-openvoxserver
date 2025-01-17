@@ -1,0 +1,15 @@
+---
+# Managed by modulesync - DO NOT EDIT
+# https://voxpupuli.org/docs/updating-files-managed-with-modulesync/
+
+name: Labeler 🏷️
+
+on:
+  - pull_request_target
+
+jobs:
+  labeler:
+    name: Labeler
+    uses: voxpupuli/crafty/.github/workflows/labeler.yml@main
+    with:
+      allowed_owner: ${{ github.repository_owner }}
