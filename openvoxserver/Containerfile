@@ -14,7 +14,7 @@ FROM ubuntu:24.04 AS final
 ARG vcs_ref
 ARG build_type
 ARG build_date
-ARG PACKAGES="ca-certificates git netbase openjdk-17-jre-headless ruby3.0 openssh-client libssh2-1 dumb-init"
+ARG PACKAGES="ca-certificates git netbase openjdk-17-jre-headless ruby3.2 openssh-client libssh2-1 dumb-init net-tools adduser"
 ARG TARGETARCH
 ARG OPENVOX_RELEASE=8
 ARG OPENVOXSERVER_VERSION=8.8.0
@@ -85,7 +85,7 @@ RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
     chmod +x /docker-entrypoint.sh /healthcheck.sh /docker-entrypoint.d/*.sh && \
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y net-tools openjdk-17-jre-headless adduser && \
+    apt-get install -y $PACKAGES && \
     dpkg -i /openvox-agent_${OPENVOXAGENT_VERSION}-1+ubuntu24.04_${TARGETARCH}.deb && \
     dpkg -i /openvox-server_${OPENVOXSERVER_VERSION}-1+ubuntu24.04_all.deb && \
     dpkg -i /openvoxdb-termini_${OPENVOXDB_VERSION}-1+ubuntu24.04_all.deb && \
