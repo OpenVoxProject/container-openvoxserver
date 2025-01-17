@@ -21,7 +21,7 @@ jobs:
         run: echo "matrix=$(cat build_versions.json | jq -c)" >> $GITHUB_OUTPUT
 
   build-X86-container:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -72,8 +72,11 @@ jobs:
           tags: |
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64
 
-  create-multiarch-manifests:
+  create-multi-arch-manifests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs:
       - setup-matrix
       - build-X86-container
@@ -88,7 +91,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create multiarch manifests
+      - name: Create multi arch manifests
         run: |
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }} \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
