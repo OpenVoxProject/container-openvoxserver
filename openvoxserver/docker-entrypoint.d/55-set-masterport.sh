@@ -3,7 +3,7 @@
 set -e
 
 hocon() {
-  /usr/bin/hocon "$@"
+  /opt/puppetlabs/puppet/lib/ruby/vendor_gems/bin/hocon "$@"
 }
 
 if test -n "$OPENVOXSERVER_PORT"; then

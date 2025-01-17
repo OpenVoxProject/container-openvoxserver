@@ -8,7 +8,7 @@ ca_running() {
 }
 
 hocon() {
-  /usr/bin/hocon "$@"
+  /opt/puppetlabs/puppet/lib/ruby/vendor_gems/bin/hocon "$@"
 }
 
 if [[ "$CA_ENABLED" != "true" ]]; then
