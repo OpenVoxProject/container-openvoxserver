@@ -80,8 +80,6 @@ ADD https://s3.osuosl.org/puppet-artifacts/openvox-server/${OPENVOXSERVER_VERSIO
 ADD https://s3.osuosl.org/puppet-artifacts/openvox-agent/${OPENVOXAGENT_VERSION}/openvox-agent_${OPENVOXAGENT_VERSION}-1%2Bubuntu24.04_${TARGETARCH}.deb /
 ADD https://s3.osuosl.org/puppet-artifacts/openvoxdb/${OPENVOXDB_VERSION}/openvoxdb-termini_${OPENVOXDB_VERSION}-1%2Bubuntu24.04_all.deb /
 
-RUN ls -la /
-
 RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
     useradd -m -u ${OPENVOX_USER_UID} -g puppet puppet && \
     chmod +x /docker-entrypoint.sh /healthcheck.sh /docker-entrypoint.d/*.sh && \

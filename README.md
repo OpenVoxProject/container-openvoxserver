@@ -11,7 +11,7 @@
   - [Version schema](#version-schema)
   - [Configuration](#configuration)
   - [Initialization Scripts](#initialization-scripts)
-  - [Persistance](#persistance)
+  - [Persistence](#persistence)
   - [How to Release the container](#how-to-release-the-container)
   - [How to contribute](#how-to-contribute)
 
@@ -22,7 +22,7 @@ This project hosts the Containerfile and the required scripts to build a OpenVox
 You can run a copy of Puppet Server with the following Docker command:
 
 ```bash
-podman run --name openvox --hostname openvox ghcr.io/OpenVoxProject/openvoxserver:8.8.0-latest
+podman run --name openvox --hostname openvox ghcr.io/openvoxproject/openvoxserver:8.8.0-latest
 ```
 
 Although it is not strictly necessary to name the container `openvox`, this is
@@ -33,7 +33,7 @@ If you would like to start the OpenVox Server with your own Puppet code, you can
 mount your own directory at `/etc/puppetlabs/code`:
 
 ```shell
-podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code ghcr.io/OpenVoxProject/openvoxserver:8.8.0-latest
+podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code ghcr.io/openvoxproject/openvoxserver:8.8.0-latest
 ```
 
 For compose file see: [CRAFTY](https://github.com/voxpupuli/crafty/tree/main/puppet/oss)
@@ -126,14 +126,14 @@ You can also create sub-directories in `/docker-custom-entrypoint.d/` for script
 - `/docker-custom-entrypoint.d/sigterm-handler/` - scripts that run when the container receives a SIGTERM signal.
 - `/docker-custom-entrypoint.d/post-execution/` - scripts that run after the openvoxserver service has stopped.
 
-## Persistance
+## Persistence
 
 If you plan to use the in-server CA, restarting the container can cause the server's keys and certificates to change, causing agents and the server to stop trusting each other.
 To prevent this, you can persist the default cadir, `/etc/puppetlabs/puppetserver/ca`.
 For example:
 
 ```shell
-podman run -v $PWD/ca-ssl:/etc/puppetlabs/puppetserver/ca ghcr.io/voxpupuli/puppetserver:8.6.1-latest
+podman run -v $PWD/ca-ssl:/etc/puppetlabs/puppetserver/ca ghcr.io/openvoxproject/openvoxserver:8.6.1-latest
 ```
 
 or in compose:
@@ -141,7 +141,7 @@ or in compose:
 ```yaml
 services:
   puppet:
-    image: ghcr.io/OpenVoxProject/openvoxserver:8.8.0-latest
+    image: ghcr.io/openvoxproject/openvoxserver:8.8.0-latest
     # ...
     volumes:
       - ./ca-ssl:/etc/puppetlabs/puppetserver/ca

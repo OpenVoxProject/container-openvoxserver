@@ -44,13 +44,13 @@ jobs:
           build_context: openvoxserver
           buildfile: openvoxserver/Containerfile
           tags: |
-            ghcr.io/OpenVoxProject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}
-            ghcr.io/OpenVoxProject/openvoxserver:${{ matrix.server_version }}-latest
-            ghcr.io/OpenVoxProject/openvoxserver:latest
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-latest
+            ghcr.io/openvoxproject/openvoxserver:latest
 
       # - name: Update Docker Hub Description for shortname
       #   uses: peter-evans/dockerhub-description@v4
       #   with:
       #     username: voxpupulibot
       #     password: ${{ secrets.DOCKERHUB_BOT_PASSWORD }}
-      #     repository: OpenVoxProject/openvoxserver
+      #     repository: openvoxproject/openvoxserver
