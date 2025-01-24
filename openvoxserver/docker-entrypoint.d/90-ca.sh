@@ -42,6 +42,7 @@ EOF
   fi
 else
   # we are the CA
+  puppet config set --section server ca_ttl "${CA_TTL}"
   hocon -f /etc/puppetlabs/puppetserver/conf.d/ca.conf \
     set certificate-authority.allow-subject-alt-names "${CA_ALLOW_SUBJECT_ALT_NAMES}"
 
