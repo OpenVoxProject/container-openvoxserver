@@ -88,7 +88,7 @@ RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
     chmod +x /docker-entrypoint.sh /healthcheck.sh /docker-entrypoint.d/*.sh && \
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y $PACKAGES openvox-server=${OPENVOXSERVER_VERSION}-1+ubuntu${UBUNTU_VERSION} && \
+    apt-get install -y $PACKAGES openvox-server=${OPENVOXSERVER_VERSION}-* && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
