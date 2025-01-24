@@ -3,8 +3,6 @@
     {
       "release": 8,
       "server_version": "8.8.0",
-      "agent_version": "8.11.0",
-      "db_version": "8.9.0",
       "r10k_version": "5.0.0",
       "rugged_version": "1.9.0"
     }
