@@ -127,11 +127,13 @@ RUN chown -R puppet /etc/puppetlabs/puppetserver && \
 
 USER puppet
 
-RUN mkdir -p /home/puppet/.puppetlabs/etc/ && \
-        ln -s /etc/puppetlabs/puppet/ /home/puppet/.puppetlabs/etc/puppet
+RUN mkdir -p /home/puppet/.puppetlabs && \
+        ln -s /etc/puppetlabs /home/puppet/.puppetlabs/etc && \
+        ln -s /opt/puppetlabs /home/puppet/.puppetlabs/opt
 
 #We need to tell puppet to use the default installation for the non-root user.
-RUN echo 'confdir = /etc/puppetlabs/puppet' >> /etc/puppetlabs/puppet/puppet.conf
+RUN echo 'confdir = /etc/puppetlabs/puppet' >> /etc/puppetlabs/puppet/puppet.conf && \
+	puppet config set cadir /etc/puppetlabs/puppetserver/ca/
 
 WORKDIR /home/puppet
 # k8s uses livenessProbe, startupProbe, readinessProbe and ignores HEALTHCHECK
