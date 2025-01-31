@@ -68,6 +68,7 @@ ENV OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m" \
     OPENVOXSERVER_ENABLE_ENV_CACHE_DEL_API=true \
     ENVIRONMENTPATH=/etc/puppetlabs/code/environments \
     HIERACONFIG='$confdir/hiera.yaml' \
+    HOME=/home/puppet \
     CSR_ATTRIBUTES='{}'
 
 COPY docker-entrypoint.sh \
@@ -128,42 +129,6 @@ USER puppet
 
 RUN mkdir -p /home/puppet/.puppetlabs/etc/ && \
         ln -s /etc/puppetlabs/puppet/ /home/puppet/.puppetlabs/etc/puppet
-
-ENV OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m" \
-    confdir=/etc/puppetlabs/puppet \
-    PATH=$PATH:/opt/puppetlabs/server/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin \
-    SSLDIR=/etc/puppetlabs/puppet/ssl \
-    LOGDIR=/var/log/puppetlabs/puppetserver \
-    OPENVOXSERVER_HOSTNAME="" \
-    CERTNAME="" \
-    DNS_ALT_NAMES="" \
-    OPENVOXSERVER_PORT=8140 \
-    AUTOSIGN=true \
-    OPENVOXSERVER_MAX_ACTIVE_INSTANCES=1 \
-    OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE=0 \
-    CA_ENABLED=true \
-    CA_TTL=157680000 \
-    CA_HOSTNAME=puppet \
-    CA_PORT=8140 \
-    CA_ALLOW_SUBJECT_ALT_NAMES=false \
-    INTERMEDIATE_CA=false \
-    INTERMEDIATE_CA_BUNDLE=/etc/puppetlabs/intermediate/ca.pem \
-    INTERMEDIATE_CRL_CHAIN=/etc/puppetlabs/intermediate/crl.pem \
-    INTERMEDIATE_CA_KEY=/etc/puppetlabs/intermediate/key.pem \
-    USE_OPENVOXDB=true \
-    OPENVOXDB_SERVER_URLS=https://openvoxdb:8081 \
-    OPENVOX_STORECONFIGS_BACKEND="puppetdb" \
-    OPENVOX_STORECONFIGS=true \
-    OPENVOX_REPORTS="puppetdb" \
-    OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED=false \
-    OPENVOXSERVER_GRAPHITE_PORT=9109 \
-    OPENVOXSERVER_GRAPHITE_HOST=exporter \
-    OPENVOXSERVER_ENVIRONMENT_TIMEOUT=unlimited \
-    OPENVOXSERVER_ENABLE_ENV_CACHE_DEL_API=true \
-    ENVIRONMENTPATH=/etc/puppetlabs/code/environments \
-    HIERACONFIG='$confdir/hiera.yaml' \
-    HOME=/home/puppet \
-    CSR_ATTRIBUTES='{}'
 
 #We need to tell puppet to use the default installation for the non-root user.
 RUN echo 'confdir = /etc/puppetlabs/puppet' >> /etc/puppetlabs/puppet/puppet.conf
