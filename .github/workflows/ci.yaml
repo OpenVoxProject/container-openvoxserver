@@ -20,6 +20,13 @@ jobs:
         run: echo "matrix=$(jq -c . build_versions.json)" >> $GITHUB_OUTPUT
 
   general_ci:
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
     uses: voxpupuli/crafty/.github/workflows/general_ci.yaml@main
     with:
       shellcheck_scan_dir: './openvoxserver'
@@ -27,11 +34,6 @@ jobs:
   build_test_container:
     name: 'Build test container'
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-      pull-requests: write
     needs: setup-matrix
     strategy:
       matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
