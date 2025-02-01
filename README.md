@@ -150,7 +150,7 @@ services:
 
 ## How to Release the container
 
-[see here](https://github.com/voxpupuli/crafty/blob/main/RELEASE.md)
+[see here](RELEASE.md)
 
 ## How to contribute
 
