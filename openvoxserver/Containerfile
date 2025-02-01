@@ -15,12 +15,10 @@ FROM ubuntu:${UBUNTU_VERSION} AS final
 ARG vcs_ref
 ARG build_type
 ARG build_date
-ARG PACKAGES="git netbase openjdk-17-jre-headless openssh-client libssh2-1 dumb-init net-tools adduser"
+ARG PACKAGES="git netbase openssh-client libssh2-1 dumb-init"
 ARG TARGETARCH
 ARG OPENVOX_RELEASE=8
 ARG OPENVOXSERVER_VERSION=8.8.0
-ARG OPENVOXAGENT_VERSION=8.11.0
-ARG OPENVOXDB_VERSION=8.9.0
 ARG OPENVOX_USER_UID=999
 ARG OPENVOX_USER_GID=999
 ARG UBUNTU_VERSION=24.04
@@ -36,39 +34,40 @@ LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
       org.label-schema.vcs-ref="$vcs_ref" \
       org.label-schema.build-date="$build_date"
 
-ENV OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m" \
-    PATH=$PATH:/opt/puppetlabs/server/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin \
-    SSLDIR=/etc/puppetlabs/puppet/ssl \
-    LOGDIR=/var/log/puppetlabs/puppetserver \
-    OPENVOXSERVER_HOSTNAME="" \
-    CERTNAME="" \
-    DNS_ALT_NAMES="" \
-    OPENVOXSERVER_PORT=8140 \
-    AUTOSIGN=true \
-    OPENVOXSERVER_MAX_ACTIVE_INSTANCES=1 \
-    OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE=0 \
+ENV AUTOSIGN=true \
+    CA_ALLOW_SUBJECT_ALT_NAMES=false \
     CA_ENABLED=true \
     CA_TTL=157680000 \
     CA_HOSTNAME=puppet \
     CA_PORT=8140 \
-    CA_ALLOW_SUBJECT_ALT_NAMES=false \
-    INTERMEDIATE_CA=false \
-    INTERMEDIATE_CA_BUNDLE=/etc/puppetlabs/intermediate/ca.pem \
-    INTERMEDIATE_CRL_CHAIN=/etc/puppetlabs/intermediate/crl.pem \
-    INTERMEDIATE_CA_KEY=/etc/puppetlabs/intermediate/key.pem \
-    USE_OPENVOXDB=true \
-    OPENVOXDB_SERVER_URLS=https://openvoxdb:8081 \
-    OPENVOX_STORECONFIGS_BACKEND="puppetdb" \
-    OPENVOX_STORECONFIGS=true \
-    OPENVOX_REPORTS="puppetdb" \
-    OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED=false \
-    OPENVOXSERVER_GRAPHITE_PORT=9109 \
-    OPENVOXSERVER_GRAPHITE_HOST=exporter \
-    OPENVOXSERVER_ENVIRONMENT_TIMEOUT=unlimited \
-    OPENVOXSERVER_ENABLE_ENV_CACHE_DEL_API=true \
+    CERTNAME="" \
+    CSR_ATTRIBUTES='{}' \
+    DEBIAN_FRONTEND=noninteractive \
+    DNS_ALT_NAMES="" \
     ENVIRONMENTPATH=/etc/puppetlabs/code/environments \
     HIERACONFIG='$confdir/hiera.yaml' \
-    CSR_ATTRIBUTES='{}'
+    INTERMEDIATE_CA_BUNDLE=/etc/puppetlabs/intermediate/ca.pem \
+    INTERMEDIATE_CA_KEY=/etc/puppetlabs/intermediate/key.pem \
+    INTERMEDIATE_CA=false \
+    INTERMEDIATE_CRL_CHAIN=/etc/puppetlabs/intermediate/crl.pem \
+    LOGDIR=/var/log/puppetlabs/puppetserver \
+    OPENVOX_REPORTS="puppetdb" \
+    OPENVOX_STORECONFIGS_BACKEND="puppetdb" \
+    OPENVOX_STORECONFIGS=true \
+    OPENVOXDB_SERVER_URLS=https://openvoxdb:8081 \
+    OPENVOXSERVER_ENABLE_ENV_CACHE_DEL_API=true \
+    OPENVOXSERVER_ENVIRONMENT_TIMEOUT=unlimited \
+    OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED=false \
+    OPENVOXSERVER_GRAPHITE_HOST=exporter \
+    OPENVOXSERVER_GRAPHITE_PORT=9109 \
+    OPENVOXSERVER_HOSTNAME="" \
+    OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m" \
+    OPENVOXSERVER_MAX_ACTIVE_INSTANCES=1 \
+    OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE=0 \
+    OPENVOXSERVER_PORT=8140 \
+    PATH=$PATH:/opt/puppetlabs/server/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin \
+    SSLDIR=/etc/puppetlabs/puppet/ssl \
+    USE_OPENVOXDB=true
 
 COPY docker-entrypoint.sh \
      healthcheck.sh \
@@ -81,8 +80,7 @@ COPY --from=builder /usr/local/bin/r10k /usr/local/bin/
 
 ADD https://apt.overlookinfratech.com/openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb /
 RUN apt-get update && \
-    apt-get install -y ca-certificates && \
-    dpkg -i /openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb && \
+    apt-get install -y ca-certificates /openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb && \
     rm /openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb
 
 RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
@@ -90,10 +88,7 @@ RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
     chmod +x /docker-entrypoint.sh /healthcheck.sh /docker-entrypoint.d/*.sh && \
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y $PACKAGES && \
-    apt-get install -y openvox-agent=${OPENVOXAGENT_VERSION}-1+ubuntu${UBUNTU_VERSION} && \
-    apt-get install -y openvox-server=${OPENVOXSERVER_VERSION}-1+ubuntu${UBUNTU_VERSION} && \
-    apt-get install -y openvoxdb-termini=${OPENVOXDB_VERSION}-1+ubuntu${UBUNTU_VERSION} && \
+    apt-get install -y $PACKAGES openvox-server=${OPENVOXSERVER_VERSION}-* && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
