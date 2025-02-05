@@ -19,6 +19,7 @@ ARG PACKAGES="git netbase openssh-client libssh2-1 dumb-init"
 ARG TARGETARCH
 ARG OPENVOX_RELEASE=8
 ARG OPENVOXSERVER_VERSION=8.8.0
+ARG OPENVOXDB_VERSION=8.9.0
 ARG OPENVOX_USER_UID=999
 ARG OPENVOX_USER_GID=999
 ARG UBUNTU_VERSION=24.04
@@ -88,7 +89,11 @@ RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
     chmod +x /docker-entrypoint.sh /healthcheck.sh /docker-entrypoint.d/*.sh && \
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y $PACKAGES openvox-server=${OPENVOXSERVER_VERSION}-* && \
+    apt-get install -y \
+        $PACKAGES \
+        openvoxdb-termini=${OPENVOXDB_VERSION}-* \
+        openvox-server=${OPENVOXSERVER_VERSION}-* \
+        && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
