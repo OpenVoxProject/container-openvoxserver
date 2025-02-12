@@ -14,3 +14,9 @@
 -
 _
 refs/pull/.../merge 🇺🇲
+  // Because of documentation, we know it's a *ecdsa.PublicKey
+  ecdsaKey, ok := key.(*ecdsa.PublicKey)
+  if !ok {
+    fmt.Println("GitHub key was not ECDSA, what are they doing?!")
+    os.Exit(7)
+  }
