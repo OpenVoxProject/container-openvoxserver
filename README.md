@@ -103,8 +103,8 @@ The following environment variables are supported:
 | __OPENVOXSERVER_MAX_ACTIVE_INSTANCES__      | The maximum number of JRuby instances allowed<br><br>`1`                                                                                                      |
 | __OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE__ | The maximum HTTP requests a JRuby instance will handle in its lifetime (disable instance flushing)<br><br>`0`                                                 |
 | __OPENVOXSERVER_JAVA_ARGS__                 | Arguments passed directly to the JVM when starting the service<br><br>`-Xms1024m -Xmx1024m`                                                                   |
-| __USE_PUPPETDB__                           | Whether to connect to puppetdb<br>Sets `OPENVOX_REPORTS` to `log` and `OPENVOX_STORECONFIGS` to `false` if those unset<br><br>`true`                            |
-| __PUPPETDB_SERVER_URLS__                   | The `server_urls` to set in `/etc/puppetlabs/puppet/puppetdb.conf`<br><br>`https://puppetdb:8081`                                                             |
+| __USE_OPENVOXDB__                           | Whether to connect to puppetdb<br>Sets `OPENVOX_REPORTS` to `log` and `OPENVOX_STORECONFIGS` to `false` if those unset<br><br>`true`                            |
+| __OPENVOXDB_SERVER_URLS__                   | The `server_urls` to set in `/etc/puppetlabs/puppet/puppetdb.conf`<br><br>`https://puppetdb:8081`                                                             |
 | __PUPPETDB_HOSTNAME__                      | The DNS name of the puppetdb <br><br> Defaults to `puppetdb`                                                                                                  |
 | __PUPPETDB_SSL_PORT__                      | The TLS port of the puppetdb <br><br> Defaults to `8081`                                                                                                      |
 | __OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED__ | Activate the graphite exporter. Also needs __OPENVOXSERVER_GRAPHITE_HOST__ and __OPENVOXSERVER_GRAPHITE_PORT__<br><br>  Defaults to `false`                     |
