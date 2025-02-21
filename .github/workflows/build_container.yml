@@ -17,8 +17,11 @@ jobs:
       - name: Source checkout
         uses: actions/checkout@v4
 
+      - name: 'Setup yq'
+        uses: dcarbone/install-yq-action@v1.3.1
+
       - id: set-matrix
-        run: echo "matrix=$(cat build_versions.json | jq -c)" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(yq -o json build_versions.yaml | jq -c)" >> $GITHUB_OUTPUT
 
   build-X86-container:
     runs-on: ubuntu-24.04
@@ -89,13 +92,23 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract version number
+        id: extract_version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const agentVersion = '${{ matrix.server_version }}';
+            const version = agentVersion.split('-')[0];
+            core.setOutput('version', version);
+
+
       - name: Create multi arch manifests
         run: |
-          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }} \
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.extract_version.outputs.version }}-${{ github.ref_name }} \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
 
-          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-latest \
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.extract_version.outputs.version }}-latest \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
 

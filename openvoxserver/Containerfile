@@ -16,13 +16,13 @@ ARG vcs_ref
 ARG build_type
 ARG build_date
 ARG PACKAGES="git netbase openssh-client libssh2-1 dumb-init"
-ARG TARGETARCH
+ARG UBUNTU_VERSION=24.04
 ARG OPENVOX_RELEASE=8
-ARG OPENVOXSERVER_VERSION=8.8.0
-ARG OPENVOXDB_VERSION=8.9.0
+ARG OPENVOXSERVER_VERSION=8.8.0-1+ubuntu${UBUNTU_VERSION}
+ARG OPENVOXDB_VERSION=8.9.0-1+ubuntu${UBUNTU_VERSION}
 ARG OPENVOX_USER_UID=999
 ARG OPENVOX_USER_GID=999
-ARG UBUNTU_VERSION=24.04
+ARG OPENVOX_RELEASE_PACKAGE=openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb
 
 LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
       org.label-schema.vendor="OpenVoxProject" \
@@ -81,8 +81,8 @@ COPY --from=builder /usr/local/bin/r10k /usr/local/bin/
 
 ADD https://apt.overlookinfratech.com/openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb /
 RUN apt-get update && \
-    apt-get install -y ca-certificates /openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb && \
-    rm /openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb
+    apt-get install -y ca-certificates /${OPENVOX_RELEASE_PACKAGE} && \
+    rm /${OPENVOX_RELEASE_PACKAGE}
 
 RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
     useradd -m -u ${OPENVOX_USER_UID} -g puppet puppet && \
@@ -91,8 +91,8 @@ RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
     apt-get upgrade -y && \
     apt-get install -y \
         $PACKAGES \
-        openvoxdb-termini=${OPENVOXDB_VERSION}-* \
-        openvox-server=${OPENVOXSERVER_VERSION}-* \
+        openvoxdb-termini=${OPENVOXDB_VERSION} \
+        openvox-server=${OPENVOXSERVER_VERSION} \
         && \
     apt-get autoremove -y && \
     apt-get clean && \
