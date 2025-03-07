@@ -5,7 +5,7 @@ include:
     server_version: "7.18.2-1+ubuntu24.04"
     # renovate: depName=openvoxdb openVoxRelease=7
     db_version: "7.21.2-1+ubuntu24.04"
-    r10k_version: "4.1.0"
+    r10k_version: "5.0.0"
     rugged_version: "1.9.0"
 
   - release: 8

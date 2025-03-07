@@ -15,7 +15,7 @@ FROM ubuntu:${UBUNTU_VERSION} AS final
 ARG vcs_ref
 ARG build_type
 ARG build_date
-ARG PACKAGES="git netbase openssh-client libssh2-1 dumb-init"
+ARG PACKAGES="git netbase openssh-client libssh2-1 dumb-init ruby3.2"
 ARG UBUNTU_VERSION=24.04
 ARG OPENVOX_RELEASE=8
 ARG OPENVOXSERVER_VERSION=8.8.0-1+ubuntu${UBUNTU_VERSION}
