@@ -65,7 +65,7 @@ The version schema has the following layout:
 Example usage:
 
 ```shell
-podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code/ ghcr.io/OpenVoxProject/openvoxserver:8.8.0-v1.0.0
+podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code/ ghcr.io/openvoxproject/openvoxserver:8.8.0-v1.0.0
 ```
 
 | Name | Description |
