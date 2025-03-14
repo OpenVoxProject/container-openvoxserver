@@ -36,7 +36,7 @@ mount your own directory at `/etc/puppetlabs/code`:
 podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code ghcr.io/openvoxproject/openvoxserver:8.8.0-latest
 ```
 
-For compose file see: [CRAFTY](https://github.com/voxpupuli/crafty/tree/main/puppet/oss)
+For compose file see: [CRAFTY](https://github.com/voxpupuli/crafty/tree/main/openvox/oss)
 
 ## Note about environment caching
 
