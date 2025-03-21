@@ -14,4 +14,4 @@ jobs:
     name: Release
     uses: voxpupuli/crafty/.github/workflows/release.yml@main
     with:
-      allowed_owner: voxpupuli
+      allowed_owner: openvoxproject

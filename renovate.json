@@ -7,6 +7,14 @@
     {
       "customType": "regex",
       "fileMatch": ["build_versions.yaml"],
+      "matchStrings": [
+        "rubygem_(?<depName>[a-z0-9_]+):\\s+'(?<currentValue>\\d+\\.\\d+\\.\\d+)'"
+      ],
+      "datasourceTemplate": "rubygems"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["build_versions.yaml"],
       "matchStrings": ["#\\s*renovate:\\s*depName=(?<depName>.*?)\\s*openVoxRelease=(?<openVoxRelease>\\d+)\\s*\\n\\s*(?<key>\\w+_version):\\s*\"(?<currentValue>.*?)\""],
       "registryUrlTemplate": "https://apt.overlookinfratech.com?suite=ubuntu24.04&components=openvox{{openVoxRelease}}&binaryArch=amd64",
       "datasourceTemplate": "deb"
