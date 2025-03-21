@@ -14,6 +14,7 @@ changelog:
       - skip-changelog
       - wont-fix
       - wontfix
+      - github_actions
 
   categories:
     - title: Breaking Changes 🛠

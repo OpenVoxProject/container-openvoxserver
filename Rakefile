@@ -12,7 +12,7 @@ else
   GitHubChangelogGenerator::RakeTask.new :changelog do |config|
     config.header = "# Changelog\n\nAll notable changes to this project will be documented in this file."
     config.exclude_labels = %w[duplicate question invalid wontfix wont-fix skip-changelog modulesync github_actions]
-    config.user = 'OpenVoxProject'
+    config.user = 'openvoxproject'
     config.project = 'container-openvoxserver'
     # get branch name from git and strip off any prefixes (e.g. 'release-')
     config.future_release = `git rev-parse --abbrev-ref HEAD`.strip.split('-', 2).last
