@@ -10,7 +10,7 @@ TEMPLATES=/var/tmp/puppet
 cd /etc/puppetlabs/puppet
 for f in auth.conf hiera.yaml puppet.conf puppetdb.conf
 do
-    test -f "$TEMPLATES/$f" && cp -np "$TEMPLATES/$f" .
+    test -f "$TEMPLATES/$f" && cp -p --update=none "$TEMPLATES/$f" .
 done
 cd /
 
