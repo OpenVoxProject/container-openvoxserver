@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "labels": ["dependencies", "renovate", "github_actions"],
   "customManagers": [
     {
       "customType": "regex",
@@ -19,5 +20,9 @@
       "registryUrlTemplate": "https://apt.overlookinfratech.com?suite=ubuntu24.04&components=openvox{{openVoxRelease}}&binaryArch=amd64",
       "datasourceTemplate": "deb"
     }
-  ]
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
+  }
 }
