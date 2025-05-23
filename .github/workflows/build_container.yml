@@ -97,8 +97,8 @@ jobs:
           registry_password: ${{ secrets.GITHUB_TOKEN }}
           build_args: |
             OPENVOX_RELEASE=${{ matrix.release }}
-            OPENVOXSERVER_VERSION=${{ matrix.server_version }}
-            OPENVOXDB_VERSION=${{ matrix.db_version }}
+            OPENVOXSERVER_VERSION=${{ needs.setup-matrix.outputs.server_version }}
+            OPENVOXDB_VERSION=${{ needs.setup-matrix.outputs.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
             RUGGED_VERSION=${{ matrix.rugged_version }}
           build_arch: linux/arm64
