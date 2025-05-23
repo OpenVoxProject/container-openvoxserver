@@ -44,19 +44,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract version number
-        id: extract_version
+      - name: Extract server version number
+        id: extract_server_version
         uses: actions/github-script@v7
         with:
           script: |
-            const agentVersion = '${{ matrix.server_version }}';
-            const version = agentVersion.split('-')[0];
-            core.setOutput('version', version);
+            const serverVersion = '${{ matrix.server_version }}';
+            const server_version = serverVersion.split('-')[0];
+            core.setOutput('server_version', server_version);
 
-      - name: Build image
+      - name: Extract db version number
+        id: extract_db_version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dbVersion = '${{ matrix.db_version }}';
+            const db_version = dbVersion.split('-')[0];
+            core.setOutput('db_version', db_version);
+
+      - name: Build Ubuntu image
         uses: docker/build-push-action@v6
         with:
-          tags: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
+          tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}'
           context: openvoxserver
           file: openvoxserver/Containerfile
           push: false
@@ -66,6 +75,20 @@ jobs:
             OPENVOXDB_VERSION=${{ matrix.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
             RUGGED_VERSION=${{ matrix.rugged_version }}
+
+      - name: Build Alpine image
+        if: ${{ matrix.release == '8' }}
+        uses: docker/build-push-action@v6
+        with:
+          tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}-alpine'
+          context: openvoxserver
+          file: openvoxserver/Containerfile.alpine
+          push: false
+          build-args: |
+            OPENVOX_RELEASE=${{ matrix.release }}
+            OPENVOXSERVER_VERSION=${{ steps.extract_server_version.outputs.server_version }}
+            OPENVOXDB_VERSION=${{ steps.extract_db_version.outputs.db_version }}
+            R10K_VERSION=${{ matrix.r10k_version }}
 
   tests:
     needs:
