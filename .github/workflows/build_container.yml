@@ -26,10 +26,10 @@ jobs:
         run: echo "matrix=$(yq -o json build_versions.yaml | jq -c)" >> $GITHUB_OUTPUT
 
       - id: server_version
-        run: echo "server_version=${{ steps.set-matrix.outputs.matrix.server_version }}" | cut -d- -f1 >> $GITHUB_OUTPUT
+        run: echo "server_version=$(yq '.include[1].server_version' build_versions.yaml )" | cut -d- -f1 >> $GITHUB_OUTPUT
 
       - id: db_version
-        run: echo "db_version=${{ steps.set-matrix.outputs.matrix.db_version }}" | cut -d- -f1 >> $GITHUB_OUTPUT
+        run: echo "db_version=$(yq '.include[1].db_version' build_versions.yaml)" | cut -d- -f1 >> $GITHUB_OUTPUT
 
   build-X86-container:
     runs-on: ubuntu-24.04
