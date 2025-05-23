@@ -53,7 +53,7 @@ jobs:
             const version = agentVersion.split('-')[0];
             core.setOutput('version', version);
 
-      - name: Build image
+      - name: Build Ubuntu image
         uses: docker/build-push-action@v6
         with:
           tags: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
@@ -66,6 +66,20 @@ jobs:
             OPENVOXDB_VERSION=${{ matrix.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
             RUGGED_VERSION=${{ matrix.rugged_version }}
+
+      - name: Build Alpine image
+        if: ${{ matrix.release == '8' }}
+        uses: docker/build-push-action@v6
+        with:
+          tags: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}-alpine'
+          context: openvoxserver
+          file: openvoxserver/Containerfile.alpine
+          push: false
+          build-args: |
+            OPENVOX_RELEASE=${{ matrix.release }}
+            OPENVOXSERVER_VERSION=${{ matrix.server_version }}
+            OPENVOXDB_VERSION=${{ matrix.db_version }}
+            R10K_VERSION=${{ matrix.r10k_version }}
 
   tests:
     needs:

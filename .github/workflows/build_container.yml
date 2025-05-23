@@ -48,6 +48,22 @@ jobs:
           tags: |
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
 
+      - name: Build Alpine OpenVox Server ${{ matrix.release }} container
+        if: ${{ matrix.release == '8' }}
+        uses: voxpupuli/gha-build-and-publish-a-container@v2
+        with:
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          build_args: |
+            OPENVOX_RELEASE=${{ matrix.release }}
+            OPENVOXSERVER_VERSION=${{ matrix.server_version }}
+            OPENVOXDB_VERSION=${{ matrix.db_version }}
+            R10K_VERSION=${{ matrix.r10k_version }}
+          build_arch: linux/amd64
+          build_context: openvoxserver
+          buildfile: openvoxserver/Containerfile.alpine
+          tags: |
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
+
   build-ARM-container:
     runs-on: ubuntu-24.04-arm
     permissions:
@@ -72,6 +88,22 @@ jobs:
           buildfile: openvoxserver/Containerfile
           tags: |
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64
+
+      - name: Build Alpine OpenVox Server ${{ matrix.release }} container
+        if: ${{ matrix.release == '8' }}
+        uses: voxpupuli/gha-build-and-publish-a-container@v2
+        with:
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          build_args: |
+            OPENVOX_RELEASE=${{ matrix.release }}
+            OPENVOXSERVER_VERSION=${{ matrix.server_version }}
+            OPENVOXDB_VERSION=${{ matrix.db_version }}
+            R10K_VERSION=${{ matrix.r10k_version }}
+          build_arch: linux/arm64
+          build_context: openvoxserver
+          buildfile: openvoxserver/Containerfile.alpine
+          tags: |
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine
 
   create-multi-arch-manifests:
     runs-on: ubuntu-latest
@@ -123,3 +155,25 @@ jobs:
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:latest \
             ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-arm64 \
             ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-x86_64
+
+      - name: Create Alpine multi arch manifests
+        run: |
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.extract_version.outputs.version }}-${{ github.ref_name }}-alpine-beta \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
+
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.extract_version.outputs.version }}-latest-alpine-beta \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
+
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-latest-alpine-beta \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
+
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-alpine-beta \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
+
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:latest-alpine-beta \
+            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-arm64-alpine \
+            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-x86_64-alpine
