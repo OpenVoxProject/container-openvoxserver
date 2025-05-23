@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      server_version: ${{ steps.extract_server_version.outputs.server_version }}
+      db_version: ${{ steps.extract_db_version.outputs.db_version }}
     steps:
       - name: Source checkout
         uses: actions/checkout@v4
