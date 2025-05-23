@@ -23,6 +23,24 @@ jobs:
       - id: set-matrix
         run: echo "matrix=$(yq -o json build_versions.yaml | jq -c)" >> $GITHUB_OUTPUT
 
+      - name: Extract server version number
+        id: extract_server_version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const serverVersion = '${{ steps.set-matrix.outputs.matrix.server_version }}';
+            const server_version = serverVersion.split('-')[0];
+            core.setOutput('server_version', server_version);
+
+      - name: Extract db version number
+        id: extract_db_version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dbVersion = '${{ steps.set-matrix.outputs.matrix.db_version }}';
+            const db_version = dbVersion.split('-')[0];
+            core.setOutput('db_version', db_version);
+
   build-X86-container:
     runs-on: ubuntu-24.04
     permissions:
@@ -55,8 +73,8 @@ jobs:
           registry_password: ${{ secrets.GITHUB_TOKEN }}
           build_args: |
             OPENVOX_RELEASE=${{ matrix.release }}
-            OPENVOXSERVER_VERSION=${{ matrix.server_version }}
-            OPENVOXDB_VERSION=${{ matrix.db_version }}
+            OPENVOXSERVER_VERSION=${{ needs.setup-matrix.outputs.server_version }}
+            OPENVOXDB_VERSION=${{ needs.setup-matrix.outputs.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
           build_arch: linux/amd64
           build_context: openvoxserver
