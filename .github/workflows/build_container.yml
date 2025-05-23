@@ -156,11 +156,11 @@ jobs:
 
       - name: Create multi arch manifests
         run: |
-          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.extract_version.outputs.version }}-${{ github.ref_name }} \
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ needs.setup-matrix.outputs.server_version }}-${{ github.ref_name }} \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
 
-          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.extract_version.outputs.version }}-latest \
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ needs.setup-matrix.outputs.server_version }}-latest \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
 
@@ -177,12 +177,13 @@ jobs:
             ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-x86_64
 
       - name: Create Alpine multi arch manifests
+        if: ${{ matrix.release == '8' }}
         run: |
-          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.extract_version.outputs.version }}-${{ github.ref_name }}-alpine-beta \
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ needs.setup-matrix.outputs.server_version }}-${{ github.ref_name }}-alpine-beta \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
 
-          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.extract_version.outputs.version }}-latest-alpine-beta \
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ needs.setup-matrix.outputs.server_version }}-latest-alpine-beta \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
 
