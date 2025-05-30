@@ -38,7 +38,7 @@ EOF
       sleep 1
     done
 
-    puppet ssl bootstrap --server="${CA_HOSTNAME}" --masterport="${CA_PORT:-8140}"
+    puppet ssl bootstrap --server="${CA_HOSTNAME}" --serverport="${CA_PORT:-8140}"
   fi
 else
   # we are the CA
