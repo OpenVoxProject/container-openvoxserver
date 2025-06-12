@@ -43,6 +43,8 @@ EOF
 else
   # we are the CA
   puppet config set --section server ca_ttl "${CA_TTL}"
+  puppet config set --section server ca_server "${CA_HOSTNAME}"
+  puppet config set --section server ca_port "${CA_PORT}"
   hocon -f /etc/puppetlabs/puppetserver/conf.d/ca.conf \
     set certificate-authority.allow-subject-alt-names "${CA_ALLOW_SUBJECT_ALT_NAMES}"
 
