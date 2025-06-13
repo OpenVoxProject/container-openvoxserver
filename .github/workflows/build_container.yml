@@ -230,6 +230,8 @@ jobs:
 
   update-dockerhub-description:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:
       - create-multi-arch-manifests
     steps:
