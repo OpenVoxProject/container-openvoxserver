@@ -71,6 +71,7 @@ ENV AUTOSIGN=true \
     USE_OPENVOXDB=true
 
 COPY container-entrypoint.sh \
+     docker-entrypoint.sh \
      healthcheck.sh \
      Containerfile \
      /
@@ -86,7 +87,7 @@ RUN apt-get update && \
 
 RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
     useradd -m -u ${OPENVOX_USER_UID} -g puppet puppet && \
-    chmod +x /container-entrypoint.sh /healthcheck.sh /container-entrypoint.d/*.sh && \
+    chmod +x /container-entrypoint.sh /docker-entrypoint.sh /healthcheck.sh /container-entrypoint.d/*.sh && \
     apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
