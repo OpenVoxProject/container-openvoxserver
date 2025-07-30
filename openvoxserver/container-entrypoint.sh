@@ -22,39 +22,35 @@ echoerr "Entrypoint PID $$"
 run_custom_handler() {
   local CUSTOM_HANDLER_ROOT_DIRECTORY=""
   local CUSTOM_HANDLER_DIRECTORY=""
+  local -a DIR_LIST=("/docker-custom-entrypoint.d" "/container-custom-entrypoint.d")
 
-  if [ -d /container-custom-entrypoint.d/ ]; then
-    # use /container-custom-entrypoint.d/ for custom entrypoint scripts
-    CUSTOM_HANDLER_ROOT_DIRECTORY=/container-custom-entrypoint.d
-  elif [ -d /docker-custom-entrypoint.d/ ]; then
-    # legacy support for /docker-custom-entrypoint.d/
-    if [[ $# -eq 1 && "$1" == "pre-default" ]]; then
-      echoerr "DEPRECATED: Use /container-custom-entrypoint.d/ instead of /docker-custom-entrypoint.d/"
-    fi
-    CUSTOM_HANDLER_ROOT_DIRECTORY=/docker-custom-entrypoint.d
-  else
-    return 0
-  fi
-
-  if [[ $# -eq 0 || "$1" == "" ]]; then
-    CUSTOM_HANDLER_DIRECTORY=${CUSTOM_HANDLER_ROOT_DIRECTORY}
-  else
-    CUSTOM_HANDLER_DIRECTORY=${CUSTOM_HANDLER_ROOT_DIRECTORY}/$1
-  fi
-
-  if [ -d ${CUSTOM_HANDLER_DIRECTORY}/ ]; then
-    find ${CUSTOM_HANDLER_DIRECTORY}/ -type f -name "*.sh" \
-      -exec chmod +x {} \;
-    sync
-    for f in ${CUSTOM_HANDLER_DIRECTORY}/*.sh; do
-      if [[ -f "$f" && -x $(realpath "$f") ]]; then
-        echo "Running $f"
-        "$f"
+  for CUSTOM_HANDLER_ROOT_DIRECTORY in "${DIR_LIST[@]}"; do
+    if [ -d "${CUSTOM_HANDLER_ROOT_DIRECTORY}" ]; then
+      if [[ "${CUSTOM_HANDLER_ROOT_DIRECTORY}" == "/docker-custom-entrypoint.d" ]]; then
+        if [[ $# -eq 1 && "$1" == "pre-default" ]]; then
+          echoerr "DEPRECATED: Use /container-custom-entrypoint.d/ instead of /docker-custom-entrypoint.d/"
+        fi
       fi
-    done
-  fi
 
-  return 0
+      if [[ $# -eq 0 || "$1" == "" ]]; then
+        CUSTOM_HANDLER_DIRECTORY=${CUSTOM_HANDLER_ROOT_DIRECTORY}
+      else
+        CUSTOM_HANDLER_DIRECTORY=${CUSTOM_HANDLER_ROOT_DIRECTORY}/$1
+      fi
+
+      if [ -d ${CUSTOM_HANDLER_DIRECTORY}/ ]; then
+        find ${CUSTOM_HANDLER_DIRECTORY}/ -type f -name "*.sh" \
+          -exec chmod +x {} \;
+        sync
+        for f in ${CUSTOM_HANDLER_DIRECTORY}/*.sh; do
+          if [[ -f "$f" && -x $(realpath "$f") ]]; then
+            echo "Running $f"
+            "$f"
+          fi
+        done
+      fi
+    fi
+  done
 }
 
 ## Pre execution handler
