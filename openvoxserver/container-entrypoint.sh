@@ -57,6 +57,14 @@ run_custom_handler() {
 pre_execution_handler() {
   run_custom_handler pre-default
 
+  if [ -d /container-entrypoint.d ]; then
+    echoerr "DEPRECATED: Use /container-entrypoint.d/ instead of /docker-entrypoint.d/"
+    for f in /docker-entrypoint.d/*.sh; do
+      echo "Running $f"
+      "$f"
+    done
+  fi
+
   for f in /container-entrypoint.d/*.sh; do
     echo "Running $f"
     "$f"
