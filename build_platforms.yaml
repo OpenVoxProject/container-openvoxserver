@@ -1,0 +1,6 @@
+---
+platforms:
+  - platform: amd64
+    runner: ubuntu-24.04
+  - platform: arm64
+    runner: ubuntu-24.04-arm
