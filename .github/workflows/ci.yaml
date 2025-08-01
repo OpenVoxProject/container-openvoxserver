@@ -14,7 +14,7 @@ jobs:
   setup-matrix:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      build_matrix: ${{ steps.set-build-matrix.outputs.build_matrix }}
     steps:
       - name: Source checkout
         uses: actions/checkout@v5
@@ -22,27 +22,19 @@ jobs:
       - name: 'Setup yq'
         uses: dcarbone/install-yq-action@v1.3.1
 
-      - id: set-matrix
-        run: echo "matrix=$(yq -o json build_versions.yaml | jq -c)" >> $GITHUB_OUTPUT
+      - id: set-build-matrix
+        run: echo "build_matrix=$(bash matrix.sh build)" >> $GITHUB_OUTPUT
 
-  general_ci:
+  build_ci_container:
+    name: Build ${{ matrix.platform }} CI container
+    runs-on: ${{ matrix.runner }}
     permissions:
-      # required for all workflows
       security-events: write
-
-      # only required for workflows in private repositories
       actions: read
       contents: read
-    uses: voxpupuli/crafty/.github/workflows/general_ci.yaml@main
-    with:
-      shellcheck_scan_dir: './openvoxserver'
-
-  build_test_container:
-    name: 'Build test container'
-    runs-on: ubuntu-latest
     needs: setup-matrix
     strategy:
-      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -72,6 +64,7 @@ jobs:
           context: openvoxserver
           file: openvoxserver/Containerfile
           push: false
+          platforms: linux/${{ matrix.platform }}
           build-args: |
             OPENVOX_RELEASE=${{ matrix.release }}
             OPENVOXSERVER_VERSION=${{ matrix.server_version }}
@@ -94,8 +87,7 @@ jobs:
 
   tests:
     needs:
-      - general_ci
-      - build_test_container
+      - build_ci_container
     runs-on: ubuntu-latest
     name: Test suite
     steps:

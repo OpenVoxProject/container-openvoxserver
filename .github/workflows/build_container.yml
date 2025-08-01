@@ -16,7 +16,8 @@ jobs:
   setup-matrix:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      build_matrix: ${{ steps.set-build-matrix.outputs.build_matrix }}
+      tag_matrix: ${{ steps.set-tag-matrix.outputs.tag_matrix }}
     steps:
       - name: Source checkout
         uses: actions/checkout@v5
@@ -24,17 +25,20 @@ jobs:
       - name: 'Setup yq'
         uses: dcarbone/install-yq-action@v1.3.1
 
-      - id: set-matrix
-        run: echo "matrix=$(yq -o json build_versions.yaml | jq -c)" >> $GITHUB_OUTPUT
+      - id: set-build-matrix
+        run: echo "build_matrix=$(bash matrix.sh build)" >> $GITHUB_OUTPUT
 
-  build-X86-container:
-    runs-on: ubuntu-24.04
+      - id: set-tag-matrix
+        run: echo "tag_matrix=$(bash matrix.sh tag)" >> $GITHUB_OUTPUT
+
+  build-and-push-container:
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
     needs: setup-matrix
     strategy:
-      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
       - id: server_version
         run: echo "server_version=${{ matrix.server_version }}" | cut -d- -f1 >> $GITHUB_OUTPUT
@@ -52,11 +56,11 @@ jobs:
             OPENVOXDB_VERSION=${{ matrix.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
             RUGGED_VERSION=${{ matrix.rugged_version }}
-          build_arch: linux/amd64
+          build_arch: linux/${{ matrix.platform }}
           build_context: openvoxserver
           buildfile: openvoxserver/Containerfile
           tags: |
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-${{ matrix.platform }}
 
       - name: Build Alpine OpenVox Server ${{ matrix.release }} container
         uses: voxpupuli/gha-build-and-publish-a-container@v2
@@ -67,57 +71,11 @@ jobs:
             OPENVOXSERVER_VERSION=${{ steps.server_version.outputs.server_version }}
             OPENVOXDB_VERSION=${{ steps.db_version.outputs.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
-          build_arch: linux/amd64
+          build_arch: linux/${{ matrix.platform }}
           build_context: openvoxserver
           buildfile: openvoxserver/Containerfile.alpine
           tags: |
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
-
-  build-ARM-container:
-    runs-on: ubuntu-24.04-arm
-    permissions:
-      contents: read
-      packages: write
-    needs: setup-matrix
-    strategy:
-      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
-    steps:
-      - id: server_version
-        run: echo "server_version=${{ matrix.server_version }}" | cut -d- -f1 >> $GITHUB_OUTPUT
-
-      - id: db_version
-        run: echo "db_version=${{ matrix.db_version }}" | cut -d- -f1 >> $GITHUB_OUTPUT
-
-      - name: Build OpenVox Server ${{ matrix.release }} container
-        uses: voxpupuli/gha-build-and-publish-a-container@v2
-        with:
-          registry_password: ${{ secrets.GITHUB_TOKEN }}
-          build_args: |
-            OPENVOX_RELEASE=${{ matrix.release }}
-            OPENVOXSERVER_VERSION=${{ matrix.server_version }}
-            OPENVOXDB_VERSION=${{ matrix.db_version }}
-            R10K_VERSION=${{ matrix.r10k_version }}
-            RUGGED_VERSION=${{ matrix.rugged_version }}
-          build_arch: linux/arm64
-          build_context: openvoxserver
-          buildfile: openvoxserver/Containerfile
-          tags: |
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64
-
-      - name: Build Alpine OpenVox Server ${{ matrix.release }} container
-        uses: voxpupuli/gha-build-and-publish-a-container@v2
-        with:
-          registry_password: ${{ secrets.GITHUB_TOKEN }}
-          build_args: |
-            OPENVOX_RELEASE=${{ matrix.release }}
-            OPENVOXSERVER_VERSION=${{ steps.server_version.outputs.server_version }}
-            OPENVOXDB_VERSION=${{ steps.db_version.outputs.db_version }}
-            R10K_VERSION=${{ matrix.r10k_version }}
-          build_arch: linux/arm64
-          build_context: openvoxserver
-          buildfile: openvoxserver/Containerfile.alpine
-          tags: |
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-${{ matrix.platform }}-alpine
 
   create-multi-arch-manifests:
     runs-on: ubuntu-latest
@@ -126,10 +84,9 @@ jobs:
       packages: write
     needs:
       - setup-matrix
-      - build-X86-container
-      - build-ARM-container
+      - build-and-push-container
     strategy:
-      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.setup-matrix.outputs.tag_matrix) }}
     steps:
       - name: Log in to the ghcr.io registry
         uses: docker/login-action@v3
