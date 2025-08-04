@@ -70,12 +70,13 @@ ENV AUTOSIGN=true \
     SSLDIR=/etc/puppetlabs/puppet/ssl \
     USE_OPENVOXDB=true
 
-COPY docker-entrypoint.sh \
+COPY container-entrypoint.sh \
+     docker-entrypoint.sh \
      healthcheck.sh \
      Containerfile \
      /
 
-COPY docker-entrypoint.d /docker-entrypoint.d
+COPY container-entrypoint.d /container-entrypoint.d
 COPY --from=builder /var/lib/gems/ /var/lib/gems/
 COPY --from=builder /usr/local/bin/r10k /usr/local/bin/
 
@@ -86,7 +87,7 @@ RUN apt-get update && \
 
 RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
     useradd -m -u ${OPENVOX_USER_UID} -g puppet puppet && \
-    chmod +x /docker-entrypoint.sh /healthcheck.sh /docker-entrypoint.d/*.sh && \
+    chmod +x /container-entrypoint.sh /docker-entrypoint.sh /healthcheck.sh /container-entrypoint.d/*.sh && \
     apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
@@ -120,5 +121,5 @@ HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/h
 # NOTE: this is just documentation on defaults
 EXPOSE 8140
 
-ENTRYPOINT ["dumb-init", "/docker-entrypoint.sh"]
+ENTRYPOINT ["dumb-init", "/container-entrypoint.sh"]
 CMD ["foreground"]

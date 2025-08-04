@@ -164,14 +164,15 @@ COPY --from=build /etc/puppetlabs /etc/puppetlabs
 COPY --from=build /var/log/puppetlabs /var/log/puppetlabs
 COPY --from=build /var/run/puppetlabs /var/run/puppetlabs
 
-COPY docker-entrypoint.sh \
+COPY container-entrypoint.sh \
+     docker-entrypoint.sh \
      healthcheck.sh \
      Containerfile.alpine \
      /
 
 COPY conf.d/product.conf /etc/puppetlabs/puppetserver/conf.d/
 COPY conf.d/puppetserver.conf /etc/puppetlabs/puppetserver/conf.d/
-COPY docker-entrypoint.d /docker-entrypoint.d
+COPY container-entrypoint.d /container-entrypoint.d
 COPY logback.xml /etc/puppetlabs/puppetserver/
 COPY puppetdb.conf /var/tmp/puppet/
 COPY puppetserver /etc/default/puppetserver
@@ -210,7 +211,7 @@ RUN apk update \
 && chmod 700 ${data_dir}/puppetserver/yaml \
 && find /etc/puppetlabs/puppet/ssl -type d -print0 | xargs -0 chmod 770 \
 && echo 'alias ll="ls -la --color=auto"' >> ~/.bashrc \
-&& chmod +x /docker-entrypoint.sh /healthcheck.sh /docker-entrypoint.d/*.sh \
+&& chmod +x /container-entrypoint.sh /docker-entrypoint.sh /healthcheck.sh /container-entrypoint.d/*.sh \
 && mkdir -p /opt/puppetlabs/puppet/bin \
 && ln -s /usr/bin/puppet /opt/puppetlabs/puppet/bin/puppet \
 && ln -s /usr/bin/facter /opt/puppetlabs/puppet/bin/facter \
@@ -228,5 +229,5 @@ HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/h
 
 EXPOSE 8140
 
-ENTRYPOINT ["dumb-init", "/docker-entrypoint.sh"]
+ENTRYPOINT ["dumb-init", "/container-entrypoint.sh"]
 CMD ["foreground"]
