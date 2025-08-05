@@ -9,6 +9,9 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: read # minimal required permissions to clone repo
+
 jobs:
   release:
     name: Release
