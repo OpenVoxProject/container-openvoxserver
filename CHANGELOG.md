@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v1.0.0](https://github.com/openvoxproject/container-openvoxserver/tree/v1.0.0) (2025-08-01)
+## [v1.0.0](https://github.com/openvoxproject/container-openvoxserver/tree/v1.0.0) (2025-08-15)
 
 [Full Changelog](https://github.com/openvoxproject/container-openvoxserver/compare/eceabf2385577eecdbcba34b87443b86416609e7...v1.0.0)
 
