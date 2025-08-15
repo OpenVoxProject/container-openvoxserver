@@ -9,6 +9,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read # minimal required permissions to clone repo
+
 jobs:
   setup-matrix:
     runs-on: ubuntu-latest

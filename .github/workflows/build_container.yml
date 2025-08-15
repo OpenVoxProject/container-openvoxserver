@@ -1,3 +1,4 @@
+---
 name: Build and publish a 🛢️ container
 
 on:
@@ -7,6 +8,9 @@ on:
     tags:
       - '*'
   workflow_dispatch:
+
+permissions:
+  contents: read # minimal required permissions to clone repo
 
 jobs:
   setup-matrix:
