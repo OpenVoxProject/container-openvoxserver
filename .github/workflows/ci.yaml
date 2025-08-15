@@ -80,7 +80,6 @@ jobs:
             RUGGED_VERSION=${{ matrix.rugged_version }}
 
       - name: Build Alpine image
-        if: ${{ matrix.release == '8' }}
         uses: docker/build-push-action@v6
         with:
           tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}-alpine'
