@@ -59,7 +59,6 @@ jobs:
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
 
       - name: Build Alpine OpenVox Server ${{ matrix.release }} container
-        if: ${{ matrix.release == '8' }}
         uses: voxpupuli/gha-build-and-publish-a-container@v2
         with:
           registry_password: ${{ secrets.GITHUB_TOKEN }}
@@ -106,7 +105,6 @@ jobs:
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64
 
       - name: Build Alpine OpenVox Server ${{ matrix.release }} container
-        if: ${{ matrix.release == '8' }}
         uses: voxpupuli/gha-build-and-publish-a-container@v2
         with:
           registry_password: ${{ secrets.GITHUB_TOKEN }}
@@ -182,7 +180,6 @@ jobs:
             ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-x86_64
 
       - name: Create Alpine multi arch manifests
-        if: ${{ matrix.release == '8' }}
         run: |
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.server_version.outputs.server_version }}-${{ github.ref_name }}-alpine-beta \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
