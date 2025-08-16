@@ -124,14 +124,15 @@ The following environment variables are supported:
 
 ## Initialization Scripts
 
-If you would like to do additional initialization, add a directory called `/docker-custom-entrypoint.d/` and fill it with `.sh` scripts.
+If you would like to do additional initialization, add a directory called `/container-custom-entrypoint.d/` and fill it with `.sh` scripts.
 
-You can also create sub-directories in `/docker-custom-entrypoint.d/` for scripts that have to run at different stages.
+You can also create sub-directories in `/container-custom-entrypoint.d/` for scripts that have to run at different stages.
 
-- `/docker-custom-entrypoint.d/` - scripts that run after the default entrypoint scripts, but before the openvoxserver service is started.
-- `/docker-custom-entrypoint.d/post-startup/` - scripts that run after the openvoxserver service is started.
-- `/docker-custom-entrypoint.d/sigterm-handler/` - scripts that run when the container receives a SIGTERM signal.
-- `/docker-custom-entrypoint.d/post-execution/` - scripts that run after the openvoxserver service has stopped.
+- `/container-custom-entrypoint.d/pre-default/` - scripts that run before the default entrypoints scripts.
+- `/container-custom-entrypoint.d/` - scripts that run after the default entrypoint scripts, but before the openvoxserver service is started.
+- `/container-custom-entrypoint.d/post-startup/` - scripts that run after the openvoxserver service is started.
+- `/container-custom-entrypoint.d/sigterm-handler/` - scripts that run when the container receives a SIGTERM signal.
+- `/container-custom-entrypoint.d/post-execution/` - scripts that run after the openvoxserver service has stopped.
 
 ## Persistence
 
