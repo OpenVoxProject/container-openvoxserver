@@ -38,6 +38,14 @@ podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code ghcr
 
 For compose file see: [CRAFTY](https://github.com/voxpupuli/crafty/tree/main/openvox/oss)
 
+## Informations
+
+### End of Life for OpenVox Server 7
+
+⚠ On February 28, 2025, OpenVox/Puppet 7 entered its end-of-life phase.
+Consequently, no new OpenVox Server 7 releases will be build.
+Existing versions will be retained for continued access.
+
 ## Note about environment caching
 
 ⚠️ The OpenVox Server has [the environment caching](https://www.puppet.com/docs/puppet/8/server/admin-api/v1/environment-cache.html) enabled by default.
