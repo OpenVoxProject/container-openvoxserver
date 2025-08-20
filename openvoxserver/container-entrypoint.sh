@@ -11,6 +11,8 @@ set -o nounset  # exit on use of undeclared var, use `${possibly_undefined-}` to
                 # `: ${possibly_undefined_or_empty:=default}` will also replace an empty (but declared) value
 # set -o xtrace
 
+PATH=$PATH:/opt/puppetlabs/puppet/lib/ruby/vendor_gems/bin:/opt/puppetlabs/server/data/puppetserver/vendored-jruby-gems/bin/
+
 pid=0
 
 echoerr() { echo "$@" 1>&2; }

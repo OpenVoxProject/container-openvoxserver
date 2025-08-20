@@ -7,10 +7,6 @@ ca_running() {
   test "$status" = "running"
 }
 
-hocon() {
-  /opt/puppetlabs/puppet/lib/ruby/vendor_gems/bin/hocon "$@"
-}
-
 if [[ "$CA_ENABLED" != "true" ]]; then
   # we are just an ordinary compiler
   echo "turning off CA"
