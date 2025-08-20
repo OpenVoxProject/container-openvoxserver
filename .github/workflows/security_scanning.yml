@@ -28,7 +28,7 @@ jobs:
         run: echo "build_matrix=$(bash matrix.sh build)" >> $GITHUB_OUTPUT
 
   scan_ci_container:
-    name: 'Scan CI container'
+    name: 'Scan ${{ matrix.platform }} CI container'
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
@@ -50,7 +50,7 @@ jobs:
             const version = agentVersion.split('-')[0];
             core.setOutput('version', version);
 
-      - name: Build CI container
+      - name: Build ${{ matrix.platform }} CI container
         uses: docker/build-push-action@v6
         with:
           tags: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
