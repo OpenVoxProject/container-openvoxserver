@@ -8,9 +8,11 @@ set -e
 TEMPLATES=/var/tmp/puppet
 
 cd /etc/puppetlabs/puppet
-for f in auth.conf hiera.yaml puppet.conf puppetdb.conf
-do
-    test -f "$TEMPLATES/$f" && cp -p --update=none "$TEMPLATES/$f" .
+for f in auth.conf hiera.yaml puppet.conf puppetdb.conf; do
+  [ -f "$TEMPLATES/$f" ] && [ ! -f "$f" ] && {
+    echo "Copying template $f from $TEMPLATES"
+    cp -p "$TEMPLATES/$f" .
+  }
 done
 cd /
 
