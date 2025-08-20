@@ -2,16 +2,14 @@ FROM alpine:3.22 AS base
 
 # Install JDK
 RUN apk update && apk upgrade \
-    && apk add openjdk17-jre-headless  \
-    && apk add --update bash \
-    && rm -rf /var/cache/apk/*
+    && apk add --no-cache openjdk17-jre-headless bash
 
 ################################################################################
 
 FROM base AS build
 
-ARG OPENVOXSERVER_VERSION=8.8.1
-ARG OPENVOXDB_VERSION=8.9.1
+ARG OPENVOXSERVER_VERSION=8.10.0
+ARG OPENVOXDB_VERSION=8.10.0
 
 ADD https://artifacts.voxpupuli.org/openvox-server/${OPENVOXSERVER_VERSION}/openvox-server-${OPENVOXSERVER_VERSION}.tar.gz /
 ADD https://artifacts.voxpupuli.org/openvoxdb/${OPENVOXDB_VERSION}/openvoxdb-${OPENVOXDB_VERSION}.tar.gz /
@@ -33,7 +31,6 @@ RUN apk update \
 && install -d -m 0755 "${apps_dir}/puppetserver" \
 && install -d -m 0770 "${data_dir}/puppetserver" \
 && install -m 0644 puppet-server-release.jar "${apps_dir}/puppetserver" \
-&& install -m 0774 ext/ezbake-functions.sh "${apps_dir}/puppetserver" \
 && install -m 0644 ext/ezbake.manifest "${apps_dir}/puppetserver" \
 && install -d -m 0755 "${etc_dir}/puppetserver/conf.d" \
 && install -d -m 0755 "${etc_dir}/puppetserver/services.d" \
@@ -57,44 +54,29 @@ RUN apk update \
 && install -m 0755 "ext/bin/puppetserver" "${bindir}/puppetserver" \
 && ln -s "../apps/puppetserver/bin/puppetserver" "${symbindir}/puppetserver" \
 && ln -s "../server/apps/puppetserver/bin/puppetserver" "${uxbindir}/puppetserver" \
-&& install -m 0755 ext/cli/foreground "${apps_dir}/puppetserver/cli/apps/foreground" \
-&& install -m 0755 ext/cli/dropsonde "${apps_dir}/puppetserver/cli/apps/dropsonde" \
 && install -m 0755 ext/cli/ca "${apps_dir}/puppetserver/cli/apps/ca" \
-&& install -m 0755 ext/cli/irb "${apps_dir}/puppetserver/cli/apps/irb" \
+&& install -m 0755 ext/cli/foreground "${apps_dir}/puppetserver/cli/apps/foreground" \
 && install -m 0755 ext/cli/gem "${apps_dir}/puppetserver/cli/apps/gem" \
-&& install -m 0755 ext/cli/reload "${apps_dir}/puppetserver/cli/apps/reload" \
+&& install -m 0755 ext/cli/irb "${apps_dir}/puppetserver/cli/apps/irb" \
+&& install -m 0755 ext/cli/prune "${apps_dir}/puppetserver/cli/apps/prune" \
 && install -m 0755 ext/cli/ruby "${apps_dir}/puppetserver/cli/apps/ruby" \
-&& install -m 0755 ext/cli/stop "${apps_dir}/puppetserver/cli/apps/stop" \
-&& install -m 0755 ext/cli/start "${apps_dir}/puppetserver/cli/apps/start" \
 && install -m 0755 ext/cli_defaults/cli-defaults.sh "${apps_dir}/puppetserver/cli" \
 && install -d -m 0700 "${app_logdir}/puppetserver" \
 && install -d -m 0755 "${run_dir}/puppetserver" \
 && install -d -m 700 "${data_dir}/puppetserver/jars" \
 && install -d -m 700 "${data_dir}/puppetserver/yaml" \
 && install -d /opt/puppetlabs/server/data/puppetserver/jruby-gems \
-&& install -d -m=775 /opt/puppetlabs/server/data \
+&& install -d -m 775 /opt/puppetlabs/server/data \
 && install -d "${etc_dir}/puppet/ssl" \
-&& install -d -m=755 "${etc_dir}/code" \
+&& install -d -m 755 "${etc_dir}/code" \
 && install -d "${etc_dir}/puppetserver/ca" \
 && bash ext/build-scripts/install-vendored-gems.sh \
-### puppetdb-termini
+# puppetdb-termini
 && cd /puppetdb-${OPENVOXDB_VERSION} \
-&& install -Dm 0644 puppet/face/node/deactivate.rb "${rubylibdir}/puppet/face/node/deactivate.rb" \
-&& install -Dm 0644 puppet/face/node/status.rb "${rubylibdir}/puppet/face/node/status.rb" \
-&& install -Dm 0644 puppet/functions/puppetdb_query.rb "${rubylibdir}/puppet/functions/puppetdb_query.rb" \
-&& install -Dm 0644 puppet/indirector/catalog/puppetdb.rb "${rubylibdir}/puppet/indirector/catalog/puppetdb.rb" \
-&& install -Dm 0644 puppet/indirector/facts/puppetdb_apply.rb "${rubylibdir}/puppet/indirector/facts/puppetdb_apply.rb" \
-&& install -Dm 0644 puppet/indirector/facts/puppetdb.rb "${rubylibdir}/puppet/indirector/facts/puppetdb.rb" \
-&& install -Dm 0644 puppet/indirector/node/puppetdb.rb "${rubylibdir}/puppet/indirector/node/puppetdb.rb" \
-&& install -Dm 0644 puppet/indirector/resource/puppetdb.rb "${rubylibdir}/puppet/indirector/resource/puppetdb.rb" \
-&& install -Dm 0644 puppet/reports/puppetdb.rb "${rubylibdir}/puppet/reports/puppetdb.rb" \
-&& install -Dm 0644 puppet/util/puppetdb.rb "${rubylibdir}/puppet/util/puppetdb.rb" \
-&& install -Dm 0644 puppet/util/puppetdb/atom.rb "${rubylibdir}/puppet/util/puppetdb/atom.rb" \
-&& install -Dm 0644 puppet/util/puppetdb/char_encoding.rb "${rubylibdir}/puppet/util/puppetdb/char_encoding.rb" \
-&& install -Dm 0644 puppet/util/puppetdb/command_names.rb "${rubylibdir}/puppet/util/puppetdb/command_names.rb" \
-&& install -Dm 0644 puppet/util/puppetdb/command.rb "${rubylibdir}/puppet/util/puppetdb/command.rb" \
-&& install -Dm 0644 puppet/util/puppetdb/config.rb "${rubylibdir}/puppet/util/puppetdb/config.rb" \
-&& install -Dm 0644 puppet/util/puppetdb/http.rb "${rubylibdir}/puppet/util/puppetdb/http.rb"
+&& for f in puppet/face/node/deactivate.rb puppet/face/node/status.rb puppet/functions/puppetdb_query.rb puppet/indirector/catalog/puppetdb.rb puppet/indirector/facts/puppetdb_apply.rb puppet/indirector/facts/puppetdb.rb puppet/indirector/node/puppetdb.rb puppet/indirector/resource/puppetdb.rb puppet/reports/puppetdb.rb puppet/util/puppetdb.rb puppet/util/puppetdb/atom.rb puppet/util/puppetdb/char_encoding.rb puppet/util/puppetdb/command_names.rb puppet/util/puppetdb/command.rb puppet/util/puppetdb/config.rb puppet/util/puppetdb/http.rb; do \
+         install -Dm 0644 $f "${rubylibdir}/$f"; \
+     done \
+&& rm -rf /openvox-server-${OPENVOXSERVER_VERSION}.tar.gz /openvoxdb-${OPENVOXDB_VERSION}.tar.gz /puppetserver-${OPENVOXSERVER_VERSION} /puppetdb-${OPENVOXDB_VERSION}
 
 ################################################################################
 
@@ -179,22 +161,8 @@ COPY puppetserver /etc/default/puppetserver
 COPY request-logging.xml /etc/puppetlabs/puppetserver/
 
 RUN apk update \
-&& apk add --update dumb-init \
-&& apk add --update alpine-sdk \
-&& apk add --update openssh-client \
-&& apk add --update openssl \
-&& apk add --update libssh2 \
-&& apk add --update ruby \
-&& apk add --update ruby-dev \
-# && apk add --update cmake \
-# install puppet gem as agent into system ruby
-&& gem install --no-doc puppet -v 8.10.0 \
-&& gem install --no-doc hocon  -v 1.4.0 \
-&& gem install --no-doc racc -v 1.8.1 \
-&& gem install --no-doc r10k -v ${R10K_VERSION} \
-&& gem install --no-doc hiera-eyaml -v 4.1.0 \
-&& gem install --no-doc puppetserver-ca -v 2.6.0 \
-# && gem install --no-doc rugged -- --with-ssh \
+&& apk add --no-cache dumb-init alpine-sdk openssh-client openssl libssh2 ruby ruby-dev \
+&& gem install --no-document openvox:8.21.1 hocon:1.4.0 racc:1.8.1 r10k:${R10K_VERSION} hiera-eyaml:4.3.0 openvoxserver-ca:3.0.0 \
 && apk del --purge alpine-sdk \
 && addgroup -g 1001 puppet \
 && adduser -G puppet -u 1001 -h ${data_dir}/puppetserver -H -D -s /sbin/nologin puppet \
@@ -222,7 +190,7 @@ RUN apk update \
 && ln -s /usr/bin/r10k /opt/puppetlabs/puppet/bin/r10k \
 && ln -s /usr/bin/hiera-eyaml /opt/puppetlabs/puppet/bin/hiera-eyaml \
 # install puppet gem as library into jruby loadpath
-&& puppetserver gem install puppet
+&& puppetserver gem install --no-document openvox
 
 # k8s uses livenessProbe, startupProbe, readinessProbe and ignores HEALTHCHECK
 HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/healthcheck.sh"]
