@@ -112,56 +112,56 @@ jobs:
         run: |
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.server_version.outputs.server_version }}-${{ github.ref_name }} \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-amd64
 
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }} \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-amd64
 
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:latest \
             ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-x86_64
+            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-amd64
 
           # on docker.io we use the voxpupuli namespace because new organizations are not free anymore
           #
           docker buildx imagetools create -t docker.io/voxpupuli/openvoxserver:${{ steps.server_version.outputs.server_version }}-${{ github.ref_name }} \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-amd64
 
           docker buildx imagetools create -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }} \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-amd64
 
           docker buildx imagetools create -t docker.io/voxpupuli/openvoxserver:latest \
             ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-x86_64
+            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-amd64
 
       - name: Create Alpine multi arch manifests
         run: |
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ steps.server_version.outputs.server_version }}-${{ github.ref_name }}-alpine-beta \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-amd64-alpine
 
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-alpine-beta \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-amd64-alpine
 
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:latest-alpine-beta \
             ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-arm64-alpine \
-            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-x86_64-alpine
+            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-amd64-alpine
 
           # on docker.io we use the voxpupuli namespace because new organizations are not free anymore
           docker buildx imagetools create -t docker.io/voxpupuli/openvoxserver:${{ steps.server_version.outputs.server_version }}-${{ github.ref_name }}-alpine-beta \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-amd64-alpine
 
           docker buildx imagetools create -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-alpine-beta \
             ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-x86_64-alpine
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-amd64-alpine
 
           docker buildx imagetools create -t docker.io/voxpupuli/openvoxserver:latest-alpine-beta \
             ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-arm64-alpine \
-            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-x86_64-alpine
+            ghcr.io/openvoxproject/openvoxserver:8-${{ github.sha }}-amd64-alpine
 
   update-dockerhub-description:
     runs-on: ubuntu-latest
