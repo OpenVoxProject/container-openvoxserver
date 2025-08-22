@@ -7,4 +7,4 @@ include:
     db_version: "8.9.1-1+ubuntu24.04"
     r10k_version: "5.0.0"
     rugged_version: "1.9.0"
-    jdk_version: "17"
+    jdk_version: "21"
