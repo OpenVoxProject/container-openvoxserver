@@ -71,6 +71,7 @@ jobs:
             OPENVOXDB_VERSION=${{ matrix.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
             RUGGED_VERSION=${{ matrix.rugged_version }}
+            JDK_VERSION=${{ matrix.jdk_version }}
 
       - name: Build Alpine image
         uses: docker/build-push-action@v6
@@ -84,6 +85,8 @@ jobs:
             OPENVOXSERVER_VERSION=${{ steps.extract_server_version.outputs.server_version }}
             OPENVOXDB_VERSION=${{ steps.extract_db_version.outputs.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
+            RUGGED_VERSION=${{ matrix.rugged_version }}
+            JDK_VERSION=${{ matrix.jdk_version }}
 
   tests:
     needs:

@@ -1,8 +1,9 @@
 FROM alpine:3.22 AS base
 
 # Install JDK
+ARG JDK_VERSION=17
 RUN apk update && apk upgrade \
-    && apk add --no-cache openjdk17-jre-headless bash
+    && apk add --no-cache openjdk${JDK_VERSION}-jre-headless bash
 
 ################################################################################
 
