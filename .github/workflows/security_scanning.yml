@@ -64,6 +64,7 @@ jobs:
             OPENVOXDB_VERSION=${{ matrix.db_version }}
             R10K_VERSION=${{ matrix.r10k_version }}
             RUGGED_VERSION=${{ matrix.rugged_version }}
+            JDK_VERSION=${{ matrix.jdk_version }}
 
       - name: Scan image with Anchore Grype
         uses: anchore/scan-action@v6
