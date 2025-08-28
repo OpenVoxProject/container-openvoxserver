@@ -9,14 +9,11 @@ on:
     tags:
       - '*'
 
-permissions:
-  contents: read # minimal required permissions to clone repo
-
 jobs:
   release:
     name: Release
     permissions:
-      contents: write
+      contents: read
     uses: voxpupuli/crafty/.github/workflows/release.yml@main
     with:
       allowed_owner: openvoxproject

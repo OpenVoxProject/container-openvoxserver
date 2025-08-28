@@ -7,23 +7,23 @@
     {
       "customType": "regex",
       "datasourceTemplate": "rubygems",
-      "fileMatch": [
-        "build_versions.yaml"
+      "managerFilePatterns": [
+        "/build_versions.yaml/"
       ],
       "matchStrings": [
-        "rubygem_(?<depName>[a-z0-9_]+):\\s+'(?<currentValue>\\d+\\.\\d+\\.\\d+)'"
+        "rubygem_(?<depName>[a-z0-9_-]+):\\s+'(?<currentValue>\\d+\\.\\d+\\.\\d+)'"
       ]
     },
     {
       "customType": "regex",
       "datasourceTemplate": "deb",
-      "fileMatch": [
-        "build_versions.yaml"
+      "managerFilePatterns": [
+        "/build_versions.yaml/"
       ],
       "matchStrings": [
         "#\\s*renovate:\\s*depName=(?<depName>.*?)\\s*openVoxRelease=(?<openVoxRelease>\\d+)\\s*\\n\\s*(?<key>\\w+_version):\\s*\"(?<currentValue>.*?)\""
       ],
-      "registryUrlTemplate": "https://apt.overlookinfratech.com?suite=ubuntu24.04&components=openvox{{openVoxRelease}}&binaryArch=amd64"
+      "registryUrlTemplate": "https://apt.voxpupuli.org?suite=ubuntu24.04&components=openvox{{openVoxRelease}}&binaryArch=amd64"
     }
   ],
   "extends": [
@@ -31,8 +31,7 @@
   ],
   "addLabels": [
     "dependencies",
-    "renovate",
-    "github_actions"
+    "renovate"
   ],
   "vulnerabilityAlerts": {
     "enabled": true,
