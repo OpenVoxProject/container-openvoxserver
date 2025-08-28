@@ -9,11 +9,12 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: read
+
 jobs:
   release:
     name: Release
-    permissions:
-      contents: read
     uses: voxpupuli/crafty/.github/workflows/release.yml@main
     with:
       allowed_owner: openvoxproject
