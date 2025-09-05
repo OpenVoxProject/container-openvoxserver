@@ -43,7 +43,7 @@ jobs:
 
       - name: Extract version number
         id: extract_version
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const agentVersion = '${{ matrix.server_version }}';
