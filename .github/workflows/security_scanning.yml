@@ -67,7 +67,7 @@ jobs:
             JDK_VERSION=${{ matrix.jdk_version }}
 
       - name: Scan image with Anchore Grype
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         id: scan
         with:
           image: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
