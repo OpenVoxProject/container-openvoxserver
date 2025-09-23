@@ -43,7 +43,7 @@ jobs:
 
       - name: Extract version number
         id: extract_version
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const agentVersion = '${{ matrix.server_version }}';
@@ -67,7 +67,7 @@ jobs:
             JDK_VERSION=${{ matrix.jdk_version }}
 
       - name: Scan image with Anchore Grype
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         id: scan
         with:
           image: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
