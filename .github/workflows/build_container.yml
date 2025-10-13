@@ -99,6 +99,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to the docker.io registry
+        if: github.actor == 'OpenVoxProject'
         uses: docker/login-action@v3
         with:
           registry: docker.io
@@ -111,7 +112,7 @@ jobs:
       - id: db_version
         run: echo "db_version=${{ matrix.db_version }}" | cut -d- -f1 >> $GITHUB_OUTPUT
 
-      - name: Create multi arch manifests
+      - name: Create Ubuntu multi arch manifests (GHCR)
         run: |
           docker buildx imagetools create -t ghcr.io/${{ github.actor }}/openvoxserver:${{ steps.server_version.outputs.server_version }}-${{ github.ref_name }} \
             ghcr.io/${{ github.actor }}/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
@@ -125,8 +126,10 @@ jobs:
             ghcr.io/${{ github.actor }}/openvoxserver:8-${{ github.sha }}-arm64 \
             ghcr.io/${{ github.actor }}/openvoxserver:8-${{ github.sha }}-amd64
 
+      - name: Create Ubuntu multi arch manifests (DockerHub)
+        if: github.actor == 'OpenVoxProject'
+        run: |
           # on docker.io we use the voxpupuli namespace because new organizations are not free anymore
-          #
           docker buildx imagetools create -t docker.io/voxpupuli/openvoxserver:${{ steps.server_version.outputs.server_version }}-${{ github.ref_name }} \
             ghcr.io/${{ github.actor }}/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64 \
             ghcr.io/${{ github.actor }}/openvoxserver:${{ matrix.release }}-${{ github.sha }}-amd64
@@ -139,7 +142,7 @@ jobs:
             ghcr.io/${{ github.actor }}/openvoxserver:8-${{ github.sha }}-arm64 \
             ghcr.io/${{ github.actor }}/openvoxserver:8-${{ github.sha }}-amd64
 
-      - name: Create Alpine multi arch manifests
+      - name: Create Alpine multi arch manifests (GHCR)
         run: |
           docker buildx imagetools create -t ghcr.io/${{ github.actor }}/openvoxserver:${{ steps.server_version.outputs.server_version }}-${{ github.ref_name }}-alpine-beta \
             ghcr.io/${{ github.actor }}/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
@@ -153,6 +156,9 @@ jobs:
             ghcr.io/${{ github.actor }}/openvoxserver:8-${{ github.sha }}-arm64-alpine \
             ghcr.io/${{ github.actor }}/openvoxserver:8-${{ github.sha }}-amd64-alpine
 
+      - name: Create Alpine multi arch manifests (DockerHub)
+        if: github.actor == 'OpenVoxProject'
+        run: |
           # on docker.io we use the voxpupuli namespace because new organizations are not free anymore
           docker buildx imagetools create -t docker.io/voxpupuli/openvoxserver:${{ steps.server_version.outputs.server_version }}-${{ github.ref_name }}-alpine-beta \
             ghcr.io/${{ github.actor }}/openvoxserver:${{ matrix.release }}-${{ github.sha }}-arm64-alpine \
