@@ -183,6 +183,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Update Docker Hub Description
+        if: github.actor == 'OpenVoxProject'
         uses: peter-evans/dockerhub-description@v5
         with:
           username: voxpupulibot
