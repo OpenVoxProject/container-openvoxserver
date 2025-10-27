@@ -27,11 +27,15 @@
       "registryUrlTemplate": "https://apt.voxpupuli.org?suite=ubuntu24.04&components=openvox{{openVoxRelease}}&binaryArch=amd64"
     }
   ],
-  "dependencyDashboardApproval": false,
-  "extends": [ "config:recommended" ],
-  "prCreation": "immediate",
+  "extends": [ "config:recommended", ":prImmediately" ],
   "vulnerabilityAlerts": {
     "addLabels": [ "security" ],
     "enabled": true
-  }
+  },
+  "packageRules": [
+    {
+      "matchPackagePatterns": [".*"],
+      "dependencyDashboardApproval": false
+    }
+  ]
 }
