@@ -1,5 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "addLabels": [ "dependencies", "renovate" ],
   "assigneesFromCodeOwners": true,
   "automerge": true,
   "automergeType": "pr",
@@ -26,17 +27,15 @@
       "registryUrlTemplate": "https://apt.voxpupuli.org?suite=ubuntu24.04&components=openvox{{openVoxRelease}}&binaryArch=amd64"
     }
   ],
-  "extends": [
-    "config:recommended"
-  ],
-  "addLabels": [
-    "dependencies",
-    "renovate"
-  ],
+  "extends": [ "config:recommended", ":prImmediately" ],
   "vulnerabilityAlerts": {
-    "enabled": true,
-    "addLabels": [
-      "security"
-    ]
-  }
+    "addLabels": [ "security" ],
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchPackagePatterns": [".*"],
+      "dependencyDashboardApproval": false
+    }
+  ]
 }

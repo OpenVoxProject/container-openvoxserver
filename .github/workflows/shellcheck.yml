@@ -1,0 +1,41 @@
+---
+# Managed by modulesync - DO NOT EDIT
+# https://voxpupuli.org/docs/updating-files-managed-with-modulesync/
+
+name: 🚦 CI / Shell Check
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: 'Shell Check'
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+    steps:
+    - name: Repository checkout
+      uses: actions/checkout@v5
+      with:
+        # Differential ShellCheck requires full git history
+        fetch-depth: 0
+
+    - id: ShellCheck
+      name: Differential ShellCheck
+      uses: redhat-plumbers-in-action/differential-shellcheck@v5
+      with:
+        scan-directory: '.'
+
+    - if: always()
+      name: Upload artifact with ShellCheck defects in SARIF format
+      uses: actions/upload-artifact@v5
+      with:
+        name: Differential ShellCheck SARIF
+        path: ${{ steps.ShellCheck.outputs.sarif }}

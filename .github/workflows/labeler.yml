@@ -13,8 +13,9 @@ permissions:
 jobs:
   labeler:
     name: Labeler
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'voxpupuli'
     permissions:
       pull-requests: write
-    uses: voxpupuli/crafty/.github/workflows/labeler.yml@main
-    with:
-      allowed_owner: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/labeler@v6
