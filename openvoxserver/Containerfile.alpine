@@ -196,6 +196,13 @@ RUN apk update \
 # install puppet gem as library into jruby loadpath
 && puppetserver gem install --no-document openvox
 
+RUN chown -R puppet:puppet /var/log/puppetlabs/puppetserver/ \
+&& chown -R puppet:puppet /etc/puppetlabs/puppet/ \
+&& chown -R puppet:puppet /opt/puppetlabs/server/data/puppetserver/ \
+&& chown -R puppet:puppet /etc/puppetlabs/puppetserver/
+
+USER puppet
+
 # k8s uses livenessProbe, startupProbe, readinessProbe and ignores HEALTHCHECK
 HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/healthcheck.sh"]
 
