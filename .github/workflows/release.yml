@@ -15,6 +15,11 @@ permissions:
 jobs:
   release:
     name: Release
-    uses: voxpupuli/crafty/.github/workflows/release.yml@main
-    with:
-      allowed_owner: openvoxproject
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create --repo ${{ github.repository }} ${{ github.ref_name }} --generate-notes
