@@ -15,11 +15,16 @@ puppetlabs.services.ca.certificate-authority-disabled-service/certificate-author
 puppetlabs.trapperkeeper.services.watcher.filesystem-watch-service/filesystem-watch-service
 EOF
 
+  ssl_dir=$(puppet config print ssldir)
   ssl_cert=$(puppet config print hostcert)
   ssl_key=$(puppet config print hostprivkey)
   ssl_ca_cert=$(puppet config print localcacert)
   ssl_crl_path=$(puppet config print hostcrl)
-
+  cadir=$(puppet config print cadir)
+  # `puppet config` cadir resolves to the system cadir, but `puppetserver ca` 
+  # resolves it to ~/.puppetlabs/etc/puppetserver/ca as non-root
+  # explicitly setting it works around the issue...
+  puppet config set cadir $cadir
 
   cd /etc/puppetlabs/puppetserver/conf.d/
   hocon -f webserver.conf set webserver.ssl-cert $ssl_cert
@@ -59,7 +64,7 @@ else
       exit 99
     fi
 
-    if [[ -f /etc/puppetlabs/puppetserver/ca/ca_crt.pem ]]; then
+    if [[ -f $cadir/ca_crt.pem ]]; then
       echo "CA already imported."
     else
       puppetserver ca import \
@@ -68,9 +73,8 @@ else
         --private-key $INTERMEDIATE_CA_KEY
     fi
   else
-    new_cadir=/etc/puppetlabs/puppetserver/ca
-
-    if [ ! -f "$new_cadir/ca_crt.pem" ] && [ ! -f "$SSLDIR/ca/ca_crt.pem" ]; then
+  
+    if [ ! -f "$cadir/ca_crt.pem" ] && [ ! -f "$ssl_dir/ca/ca_crt.pem" ]; then
         # There is no existing CA
 
         # Append user-supplied DNS Alt Names
@@ -87,13 +91,11 @@ else
 
         # See puppet.conf file for relevant settings
         puppetserver ca setup \
-            --ca-name "$ca_name" \
-            --config /etc/puppetlabs/puppet/puppet.conf
+            --ca-name "$ca_name" 
 
-    elif [ ! -f "$new_cadir/ca_crt.pem" ] && [ -f "$SSLDIR/ca/ca_crt.pem" ]; then
+    elif [ ! -f "$cadir/ca_crt.pem" ] && [ -f "$ssl_dir/ca/ca_crt.pem" ]; then
         # Legacy CA upgrade
-        puppetserver ca migrate \
-            --config /etc/puppetlabs/puppet/puppet.conf
+        puppetserver ca migrate 
     fi
   fi
 fi
