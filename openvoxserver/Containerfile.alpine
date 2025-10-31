@@ -1,3 +1,7 @@
+ARG OPENVOXSERVER_VERSION=8.10.0
+ARG OPENVOXDB_VERSION=8.10.0
+ARG R10K_VERSION=5.0.0
+
 FROM alpine:3.22 AS base
 
 # Install JDK
@@ -9,8 +13,8 @@ RUN apk update && apk upgrade \
 
 FROM base AS build
 
-ARG OPENVOXSERVER_VERSION=8.10.0
-ARG OPENVOXDB_VERSION=8.10.0
+ARG OPENVOXSERVER_VERSION
+ARG OPENVOXDB_VERSION
 
 ADD https://artifacts.voxpupuli.org/openvox-server/${OPENVOXSERVER_VERSION}/openvox-server-${OPENVOXSERVER_VERSION}.tar.gz /
 ADD https://artifacts.voxpupuli.org/openvoxdb/${OPENVOXDB_VERSION}/openvoxdb-${OPENVOXDB_VERSION}.tar.gz /
@@ -84,7 +88,8 @@ FROM base AS final
 
 ARG vcs_ref
 ARG build_date
-ARG R10K_VERSION=5.0.0
+ARG R10K_VERSION
+ARG OPENVOXSERVER_VERSION
 
 LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
       org.label-schema.vendor="OpenVoxProject" \
