@@ -202,6 +202,8 @@ RUN chown -R puppet:puppet /var/log/puppetlabs/puppetserver/ \
 && chown -R puppet:puppet /etc/puppetlabs/puppetserver/
 
 USER puppet
+RUN install -d -m 0755 ~/.puppetlabs/etc/puppet \
+&& install -d -m 0755 ~/.puppetlabs/etc/puppetserver/ca
 
 # k8s uses livenessProbe, startupProbe, readinessProbe and ignores HEALTHCHECK
 HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/healthcheck.sh"]
