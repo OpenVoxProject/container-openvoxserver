@@ -129,7 +129,6 @@ ENV AUTOSIGN=true \
     OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE=0 \
     OPENVOXSERVER_PORT=8140 \
     PATH=$PATH:/opt/puppetlabs/server/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin \
-    SSLDIR=/etc/puppetlabs/puppet/ssl \
     USE_OPENVOXDB=true \
     ### build variables
     apps_dir=/opt/puppetlabs/server/apps \

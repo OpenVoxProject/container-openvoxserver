@@ -59,7 +59,8 @@ else
       exit 99
     fi
 
-    if [[ -f /etc/puppetlabs/puppetserver/ca/ca_crt.pem ]]; then
+    ca_cert=$(puppet config print cacert)
+    if [[ -f "$ca_cert" ]]; then
       echo "CA already imported."
     else
       puppetserver ca import \
@@ -68,9 +69,10 @@ else
         --private-key $INTERMEDIATE_CA_KEY
     fi
   else
-    new_cadir=/etc/puppetlabs/puppetserver/ca
+    new_cadir=$(puppet config print cadir)
+    ssl_dir=$(puppet config print ssldir)
 
-    if [ ! -f "$new_cadir/ca_crt.pem" ] && [ ! -f "$SSLDIR/ca/ca_crt.pem" ]; then
+    if [ ! -f "$new_cadir/ca_crt.pem" ] && [ ! -f "$ssl_dir/ca/ca_crt.pem" ]; then
         # There is no existing CA
 
         # Append user-supplied DNS Alt Names
@@ -87,13 +89,11 @@ else
 
         # See puppet.conf file for relevant settings
         puppetserver ca setup \
-            --ca-name "$ca_name" \
-            --config /etc/puppetlabs/puppet/puppet.conf
+            --ca-name "$ca_name" 
 
-    elif [ ! -f "$new_cadir/ca_crt.pem" ] && [ -f "$SSLDIR/ca/ca_crt.pem" ]; then
+    elif [ ! -f "$new_cadir/ca_crt.pem" ] && [ -f "$ssl_dir/ca/ca_crt.pem" ]; then
         # Legacy CA upgrade
-        puppetserver ca migrate \
-            --config /etc/puppetlabs/puppet/puppet.conf
-    fi
+        puppetserver ca migrate     
+        fi
   fi
 fi
