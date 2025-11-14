@@ -9,7 +9,7 @@ config_section=main
 # an existing certificate on the /etc/puppetlabs/puppet volume
 if [ -n "${DNS_ALT_NAMES}" ]; then
     certname=$(puppet config print certname)
-    if test ! -f "${SSLDIR}/certs/$certname.pem" ; then
+    if test ! -f "$(puppet config print ssldir)/certs/$certname.pem" ; then
         puppet config set dns_alt_names "${DNS_ALT_NAMES}" --section "${config_section}"
     else
         actual=$(puppet config print dns_alt_names --section "${config_section}")

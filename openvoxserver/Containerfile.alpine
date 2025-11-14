@@ -129,7 +129,6 @@ ENV AUTOSIGN=true \
     OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE=0 \
     OPENVOXSERVER_PORT=8140 \
     PATH=$PATH:/opt/puppetlabs/server/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin \
-    SSLDIR=/etc/puppetlabs/puppet/ssl \
     USE_OPENVOXDB=true \
     ### build variables
     apps_dir=/opt/puppetlabs/server/apps \
@@ -191,6 +190,43 @@ RUN apk update \
 && ln -s /usr/bin/hiera-eyaml /opt/puppetlabs/puppet/bin/hiera-eyaml \
 # install puppet gem as library into jruby loadpath
 && puppetserver gem install --no-document openvox
+
+# explicitly set HOME: random UIDs will cause HOME to be "/" generally
+ENV HOME=${data_dir}/puppetserver
+
+# use system/root paths instead of non-root paths to make permission management
+# and volume mounting simpler. for this we link the appropiate paths and explicitly
+# set the base paths used for interpolation, i.e confdir, codedir, vardir, rundir and 
+# logdir via the template and/or via `30-ensure-config.sh` in `puppet.conf`
+RUN mkdir -p ${HOME}/.puppetlabs/var \
+&& ln -sf /etc/puppetlabs ${HOME}/.puppetlabs/etc \
+&& ln -sf /opt/puppetlabs ${HOME}/.puppetlabs/opt \
+&& ln -sf /var/log/puppetlabs ${HOME}/.puppetlabs/var/log \
+&& ln -sf /var/run/puppetlabs ${HOME}/.puppetlabs/var/run
+
+# mirror user permissions to group, set group to root, and set gid bit on dirs
+RUN for d in \
+    /etc/puppetlabs \
+    /var/log/puppetlabs \
+    /var/run/puppetlabs \
+    /opt/puppetlabs/ \
+  ; do \
+    mkdir -p "$d"; \
+    chgrp -R 0 "$d"; \
+    chmod -R g=u "$d"; \
+    find "$d" -type d -exec chmod g+s {} +; \
+  done
+
+# the foreground starting script has this check before running the server:
+# [ "$EUID" = "$(id -u ${USER})" ]
+# simply calling `id -u` results in the UID of the current user and the check will pass
+RUN sed -i 's/^ *USER="puppet"/USER=""/' /etc/default/puppetserver
+# `puppetserver setup` forces symlinking the "old" cadir to the "new" one for puppet 6 compatibility 
+# reasons. this won't work because after creating a link ruby tries to call chown
+RUN sed -i '/Puppetserver::Ca::Utils::Config\.symlink_to_old_cadir/ s/^/# /' \
+  /usr/lib/ruby/gems/3.4.0/gems/openvoxserver-ca-3.0.0/lib/puppetserver/ca/action/setup.rb
+
+USER puppet:0
 
 # k8s uses livenessProbe, startupProbe, readinessProbe and ignores HEALTHCHECK
 HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/healthcheck.sh"]
