@@ -194,23 +194,22 @@ RUN apk update \
 # explicitly set HOME: random UIDs will cause HOME to be "/" generally
 ENV HOME=${data_dir}/puppetserver
 
-# use system confdir to make it easier to manage permissions and paths
-# the conf in that dir should also contain other dirs that are being used for interpolation
-# to make sure we use the same dirs as if the server was started as root
-RUN mkdir -p ${HOME}/.puppetlabs/etc/puppet && \
-    cat > ${HOME}/.puppetlabs/etc/puppet/puppet.conf <<'EOF'
-[main]
-confdir = /etc/puppetlabs/puppet/
-EOF
+# use system/root paths instead of non-root paths to make permission management
+# and volume mounting simpler. for this we link the appropiate paths and explicitly
+# set the base paths used for interpolation, i.e confdir, codedir, vardir, rundir and 
+# logdir via the template and/or via `30-ensure-config.sh` in `puppet.conf`
+RUN mkdir -p ${HOME}/.puppetlabs/var \
+&& ln -sf /etc/puppetlabs ${HOME}/.puppetlabs/etc \
+&& ln -sf /opt/puppetlabs ${HOME}/.puppetlabs/opt \
+&& ln -sf /var/log/puppetlabs ${HOME}/.puppetlabs/var/log \
+&& ln -sf /var/run/puppetlabs ${HOME}/.puppetlabs/var/run
 
 # mirror user permissions to group, set group to root, and set gid bit on dirs
 RUN for d in \
     /etc/puppetlabs \
     /var/log/puppetlabs \
     /var/run/puppetlabs \
-    /opt/puppetlabs/var \
-    /opt/puppetlabs/cache \
-    ${data_dir} \
+    /opt/puppetlabs/ \
   ; do \
     mkdir -p "$d"; \
     chgrp -R 0 "$d"; \
