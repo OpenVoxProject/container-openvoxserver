@@ -20,7 +20,7 @@ jobs:
       tag_matrix: ${{ steps.set-tag-matrix.outputs.tag_matrix }}
     steps:
       - name: Source checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: 'Setup yq'
         uses: dcarbone/install-yq-action@v1.3.1
@@ -174,7 +174,7 @@ jobs:
       - create-multi-arch-manifests
     steps:
       - name: Source checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v5

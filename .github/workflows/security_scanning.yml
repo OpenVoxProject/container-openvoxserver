@@ -19,7 +19,7 @@ jobs:
       build_matrix: ${{ steps.set-build-matrix.outputs.build_matrix }}
     steps:
       - name: Source checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: 'Setup yq'
         uses: dcarbone/install-yq-action@v1.3.1
@@ -39,7 +39,7 @@ jobs:
       matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Extract version number
         id: extract_version
