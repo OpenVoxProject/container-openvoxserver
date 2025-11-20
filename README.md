@@ -78,29 +78,31 @@ Example usage:
 podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code/ ghcr.io/openvoxproject/openvoxserver:8.8.0-v1.0.0
 ```
 
-| Name | Description |
-| --- | --- |
-| openvox.major | Describes the contained major OpenVox version |
-| openvox.minor | Describes the contained minor OpenVox version |
-| openvox.patch | Describes the contained patchlevel OpenVox version |
+| Name            | Description                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| openvox.major   | Describes the contained major OpenVox version                                             |
+| openvox.minor   | Describes the contained minor OpenVox version                                             |
+| openvox.patch   | Describes the contained patchlevel OpenVox version                                        |
 | container.major | Describes the major version of the base container (Ubunutu 24.04) or incompatible changes |
-| container.minor | Describes new features or refactoring with backward compatibility |
-| container.patch | Describes if minor changes or bugfixes have been implemented |
+| container.minor | Describes new features or refactoring with backward compatibility                         |
+| container.patch | Describes if minor changes or bugfixes have been implemented                              |
 
 ## Configuration
 
 The following environment variables are supported:
 
-| Name                                        | Usage / Default                                                                                                                                               |
-|---------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+<!-- markdownlint-disable table-column-style -->
+<!-- markdownlint-disable line-length -->
+| Name                                        | Usage / Default |
+|---------------------------------------------| --------------- |
 | __AUTOSIGN__                                | Whether or not to enable autosigning on the openvoxserver instance. Valid values are `true`, `false`, and `/path/to/autosign.conf`.<br><br>Defaults to `true`. |
-| __CA_ALLOW_SUBJECT_ALT_NAMES__              | Whether or not SSL certificates containing Subject Alternative Names should be signed by the CA. Does nothing unless `CA_ENABLED=true`.<br><br>Defaults to `false` | <!-- markdownlint-disable-line -->
+| __CA_ALLOW_SUBJECT_ALT_NAMES__              | Whether or not SSL certificates containing Subject Alternative Names should be signed by the CA. Does nothing unless `CA_ENABLED=true`.<br><br>Defaults to `false` |
 | __CA_ENABLED__                              | Whether or not this openvoxserver instance has a running CA (Certificate Authority)<br><br>Defaults to `true` |
 | __CA_HOSTNAME__                             | The DNS hostname for the openvoxserver running the CA. Does nothing unless `CA_ENABLED=false`<br><br>Defaults to `puppet` |
 | __CA_PORT__                                 | The listening port of the CA. Does nothing unless `CA_ENABLED=false`<br><br>Defaults to `8140` |
 | __CA_TTL__                                  | CA expire date (in seconds or with suffix `s`, `m`, `h`, `d`, `y`)<br><br>Defaults to `157680000` |
 | __CERTNAME__                                | The DNS name used on the servers SSL certificate - sets the `certname` in puppet.conf<br><br>Defaults to unset. |
-| __CSR_ATTRIBUTES__                          | Provide a JSON string of the csr_attributes.yaml content. e.g. `CSR_ATTRIBUTES='{"custom_attributes": { "challengePassword": "foobar" }, "extension_requests": { "pp_project": "foo" } }'`<br><br> Defaults to empty JSON object `{}`<br> Please note that within a compose file, you must provide all environment variables as Hash and not as Array!<br> environment:<br> `CSR_ATTRIBUTES: '{"extension_request": {...}}'` | <!-- markdownlint-disable-line -->
+| __CSR_ATTRIBUTES__                          | Provide a JSON string of the csr_attributes.yaml content. e.g. `CSR_ATTRIBUTES='{"custom_attributes": { "challengePassword": "foobar" }, "extension_requests": { "pp_project": "foo" } }'`<br><br> Defaults to empty JSON object `{}`<br> Please note that within a compose file, you must provide all environment variables as Hash and not as Array!<br> environment:<br> `CSR_ATTRIBUTES: '{"extension_request": {...}}'` |
 | __DNS_ALT_NAMES__                           | Additional DNS names to add to the servers SSL certificate<br>__Note__ only effective on initial run when certificates are generated |
 | __ENVIRONMENTPATH__                         | Set an environmentpath<br><br> Defaults to `/etc/puppetlabs/code/environments` |
 | __HIERACONFIG__                             | Set a hiera_config entry in puppet.conf file<br><br> Defaults to `$confdir/hiera.yaml` |
@@ -111,18 +113,20 @@ The following environment variables are supported:
 | __OPENVOX_REPORTS__                         | Sets `reports` in puppet.conf<br><br>Defaults to `puppetdb` |
 | __OPENVOX_STORECONFIGS__                    | Sets `storeconfigs` in puppet.conf<br><br>Defaults to `true` |
 | __OPENVOX_STORECONFIGS_BACKEND__            | Sets `storeconfigs_backend` in puppet.conf<br><br>Defaults to `puppetdb` |
-| __OPENVOXDB_SERVER_URLS__                   | The URL of the OpenVoxDB servers. This is used to connect to the OpenVoxDB server. <br><br> Defaults to `https://openvoxdb:8081`<br> Please note that within a compose file, you must provide all environment variables as Hash and not as Array!<br> environment:<br> `OPENVOXDB_SERVER_URLS: 'https://openvoxdb:8081'` | <!-- markdownlint-disable-line -->
+| __OPENVOXDB_SERVER_URLS__                   | The URL of the OpenVoxDB servers. This is used to connect to the OpenVoxDB server. <br><br> Defaults to `https://openvoxdb:8081`<br> Please note that within a compose file, you must provide all environment variables as Hash and not as Array!<br> environment:<br> `OPENVOXDB_SERVER_URLS: 'https://openvoxdb:8081'` |
 | __OPENVOXSERVER_ENABLE_ENV_CACHE_DEL_API__  | Enable the puppet admin api endpoint via certificates to allow clearing environment caches<br><br> Defaults to `true` |
 | __OPENVOXSERVER_ENVIRONMENT_TIMEOUT__       | Configure the environment timeout<br><br> Defaults to `unlimited` |
 | __OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED__ | Activate the graphite exporter. Also needs __OPENVOXSERVER_GRAPHITE_HOST__ and __OPENVOXSERVER_GRAPHITE_PORT__<br><br>  Defaults to `false` |
-| __OPENVOXSERVER_GRAPHITE_HOST__             | Only used if __OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED__ is set to `true`. FQDN or Hostname of the graphite server where puppet should push metrics to. <br><br> Defaults to `exporter` | <!-- markdownlint-disable-line -->
-| __OPENVOXSERVER_GRAPHITE_PORT__             | Only used if __OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED__ is set to `true`. Port of the graphite server where puppet should push metrics to. <br><br> Default to `9109` | <!-- markdownlint-disable-line -->
+| __OPENVOXSERVER_GRAPHITE_HOST__             | Only used if __OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED__ is set to `true`. FQDN or Hostname of the graphite server where puppet should push metrics to. <br><br> Defaults to `exporter` |
+| __OPENVOXSERVER_GRAPHITE_PORT__             | Only used if __OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED__ is set to `true`. Port of the graphite server where puppet should push metrics to. <br><br> Default to `9109` |
 | __OPENVOXSERVER_HOSTNAME__                  | The DNS name used on the servers SSL certificate - sets the `server` in puppet.conf<br><br>Defaults to unset. |
 | __OPENVOXSERVER_JAVA_ARGS__                 | Arguments passed directly to the JVM when starting the service<br><br>Defaults to `-Xms1024m -Xmx1024m` |
 | __OPENVOXSERVER_MAX_ACTIVE_INSTANCES__      | The maximum number of JRuby instances allowed<br><br>Defaults to `1` |
 | __OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE__ | The maximum HTTP requests a JRuby instance will handle in its lifetime (disable instance flushing)<br><br>Defaults to `0` |
 | __OPENVOXSERVER_PORT__                      | The port of the openvoxserver<br><br>Defaults to `8140` |
-| __USE_OPENVOXDB__                           |  Whether to connect to puppetdb <br>Sets `OPENVOX_REPORTS` to `log` and `OPENVOX_STORECONFIGS` to `false` if `OPENVOX_STORECONFIGS_BACKEND` is `puppetdb`. <br><br>Defaults to `true`| <!-- markdownlint-disable-line -->
+| __USE_OPENVOXDB__                           | Whether to connect to puppetdb <br>Sets `OPENVOX_REPORTS` to `log` and `OPENVOX_STORECONFIGS` to `false` if `OPENVOX_STORECONFIGS_BACKEND` is `puppetdb`. <br><br>Defaults to `true` |
+<!-- markdownlint-enable line-length -->
+<!-- markdownlint-enable table-column-style -->
 
 ## Initialization Scripts
 
