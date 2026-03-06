@@ -51,7 +51,7 @@ jobs:
             core.setOutput('version', version);
 
       - name: Build ${{ matrix.platform }} CI container
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           tags: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
           context: openvoxserver

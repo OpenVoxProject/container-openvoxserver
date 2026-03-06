@@ -58,7 +58,7 @@ jobs:
             core.setOutput('db_version', db_version);
 
       - name: Build Ubuntu image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}'
           context: openvoxserver
@@ -74,7 +74,7 @@ jobs:
             JDK_VERSION=${{ matrix.jdk_version }}
 
       - name: Build Alpine image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}-alpine'
           context: openvoxserver
