@@ -80,7 +80,7 @@ COPY container-entrypoint.d /container-entrypoint.d
 COPY --from=builder /var/lib/gems/ /var/lib/gems/
 COPY --from=builder /usr/local/bin/r10k /usr/local/bin/
 
-ADD https://apt.overlookinfratech.com/openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb /
+ADD https://apt.voxpupuli.org/openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb /
 RUN apt-get update && \
     apt-get install -y ca-certificates /${OPENVOX_RELEASE_PACKAGE} && \
     rm /${OPENVOX_RELEASE_PACKAGE}
