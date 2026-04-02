@@ -3,10 +3,9 @@
 require 'json'
 require 'yaml'
 
-target_path = ARGV[0] || '/etc/puppetlabs/puppet/csr_attributes.yaml'
 begin
   csr_yaml = YAML.dump(JSON.load(ENV['CSR_ATTRIBUTES']))
-  File.write(target_path, csr_yaml)
+  File.write('/etc/puppetlabs/puppet/csr_attributes.yaml', csr_yaml)
 rescue => error
   puts "Error on reading JSON env. Terminating"
   puts "Malformed JSON: #{ENV['CSR_ATTRIBUTES']}"

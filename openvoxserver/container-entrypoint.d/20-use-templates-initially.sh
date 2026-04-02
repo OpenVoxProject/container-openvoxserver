@@ -7,7 +7,7 @@ set -e
 # default
 TEMPLATES=/var/tmp/puppet
 
-cd "$(puppet config print confdir)"
+cd /etc/puppetlabs/puppet
 for f in auth.conf hiera.yaml puppet.conf puppetdb.conf; do
   [ -f "$TEMPLATES/$f" ] && [ ! -f "$f" ] && {
     echo "Copying template $f from $TEMPLATES"
