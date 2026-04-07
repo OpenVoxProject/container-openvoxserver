@@ -224,7 +224,11 @@ RUN sed -i 's/^ *USER="puppet"/USER=""/' /etc/default/puppetserver
 # `puppetserver setup` forces symlinking the "old" cadir to the "new" one for puppet 6 compatibility 
 # reasons. this won't work because after creating a link ruby tries to call chown
 RUN sed -i '/Puppetserver::Ca::Utils::Config\.symlink_to_old_cadir/ s/^/# /' \
-  /usr/lib/ruby/gems/3.4.0/gems/openvoxserver-ca-3.0.0/lib/puppetserver/ca/action/setup.rb
+    /usr/lib/ruby/gems/*/gems/openvoxserver-ca-*/lib/puppetserver/ca/action/setup.rb
+# `FileUtils.chown` calls fail in rootless containers because the process
+# lacks CAP_CHOWN. The ownership is already handled by the g=u / SGID pattern above.
+RUN sed -i 's/FileUtils\.chown/# FileUtils.chown/' \
+    /usr/lib/ruby/gems/*/gems/openvoxserver-ca-*/lib/puppetserver/ca/utils/file_system.rb
 
 USER puppet:0
 
