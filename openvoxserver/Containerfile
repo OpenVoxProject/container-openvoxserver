@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=24.04
+ARG UBUNTU_VERSION=26.04
 FROM ubuntu:${UBUNTU_VERSION} AS builder
 
 ARG BUILD_PKGS="ruby3.2-dev gcc make cmake pkg-config libssl-dev libc6-dev libssh2-1-dev"
