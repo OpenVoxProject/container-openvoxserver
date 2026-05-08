@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=24.04
+ARG UBUNTU_VERSION=26.04
 FROM ubuntu:${UBUNTU_VERSION} AS builder
 
 ARG BUILD_PKGS="ruby3.2-dev gcc make cmake pkg-config libssl-dev libc6-dev libssh2-1-dev"
@@ -16,7 +16,7 @@ ARG vcs_ref
 ARG build_type
 ARG build_date
 ARG PACKAGES="git netbase openssh-client libssh2-1 dumb-init ruby3.2"
-ARG UBUNTU_VERSION=24.04
+ARG UBUNTU_VERSION=26.04
 ARG OPENVOX_RELEASE=8
 ARG OPENVOXSERVER_VERSION=8.8.0-1+ubuntu${UBUNTU_VERSION}
 ARG OPENVOXDB_VERSION=8.9.0-1+ubuntu${UBUNTU_VERSION}
