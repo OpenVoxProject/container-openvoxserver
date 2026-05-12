@@ -1,0 +1,104 @@
+FROM alpine:3.23 AS base
+
+# Install JDK
+ARG JDK_VERSION=25
+RUN apk update && apk upgrade \
+    && apk add --no-cache openjdk${JDK_VERSION}-jre-headless bash tar xz \
+    && rm -rf /var/cache/apk/*
+
+################################################################################
+
+FROM base AS build
+
+ARG OPENVOXSERVER_VERSION=8.13.0
+ARG OPENVOXDB_VERSION=8.13.0
+
+ADD https://artifacts.voxpupuli.org/openvox-server/${OPENVOXSERVER_VERSION}/openvox-server-${OPENVOXSERVER_VERSION}.tar.gz /
+ADD https://artifacts.voxpupuli.org/openvoxdb/${OPENVOXDB_VERSION}/openvoxdb-${OPENVOXDB_VERSION}.tar.gz /
+
+COPY openvoxserver/prep_build_container.sh /
+RUN bash -x /prep_build_container.sh
+
+################################################################################
+FROM base AS final
+
+# renovate: depName=hiera-eyaml datasource=rubygems
+ARG RUBYGEM_HIERA_EYAML=5.0.1
+# renovate: depName=openvox datasource=rubygems
+ARG RUBYGEM_OPENVOX=8.27.0
+# renovate: depName=openvoxserver-ca datasource=rubygems
+ARG RUBYGEM_OPENVOXSERVER_CA=3.2.0
+# renovate: depName=r10k datasource=rubygems
+ARG RUBYGEM_R10K=5.0.3
+# renovate: depName=rugged datasource=rubygems
+ARG RUBYGEM_RUGGED=1.9.0
+
+LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
+      org.label-schema.vendor="OpenVoxProject" \
+      org.label-schema.url="https://github.com/OpenVoxProject/container-openvoxserver" \
+      org.label-schema.vcs-url="https://github.com/OpenVoxProject/container-openvoxserver" \
+      org.label-schema.schema-version="1.0" \
+      org.label-schema.dockerfile="/Containerfile" \
+      org.label-schema.name="OpenVox Server"
+
+ENV AUTOSIGN=true \
+    CA_ALLOW_SUBJECT_ALT_NAMES=false \
+    CA_ENABLED=true \
+    CA_TTL=157680000 \
+    CA_HOSTNAME=puppet \
+    CA_PORT=8140 \
+    CERTNAME="" \
+    CSR_ATTRIBUTES='{}' \
+    DEBIAN_FRONTEND=noninteractive \
+    DNS_ALT_NAMES="" \
+    ENVIRONMENTPATH=/etc/puppetlabs/code/environments \
+    HIERACONFIG='$confdir/hiera.yaml' \
+    INTERMEDIATE_CA_BUNDLE=/etc/puppetlabs/intermediate/ca.pem \
+    INTERMEDIATE_CA_KEY=/etc/puppetlabs/intermediate/key.pem \
+    INTERMEDIATE_CA=false \
+    INTERMEDIATE_CRL_CHAIN=/etc/puppetlabs/intermediate/crl.pem \
+    LOGDIR=/var/log/puppetlabs/puppetserver \
+    OPENVOX_REPORTS="puppetdb" \
+    OPENVOX_STORECONFIGS_BACKEND="puppetdb" \
+    OPENVOX_STORECONFIGS=true \
+    OPENVOXDB_SERVER_URLS=https://openvoxdb:8081 \
+    OPENVOXSERVER_ENABLE_ENV_CACHE_DEL_API=true \
+    OPENVOXSERVER_ENVIRONMENT_TIMEOUT=unlimited \
+    OPENVOXSERVER_GRAPHITE_EXPORTER_ENABLED=false \
+    OPENVOXSERVER_GRAPHITE_HOST=exporter \
+    OPENVOXSERVER_GRAPHITE_PORT=9109 \
+    OPENVOXSERVER_HOSTNAME="" \
+    OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m" \
+    OPENVOXSERVER_MAX_ACTIVE_INSTANCES=1 \
+    OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE=0 \
+    OPENVOXSERVER_PORT=8140 \
+    PATH=$PATH:/opt/puppetlabs/server/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin \
+    USE_OPENVOXDB=true
+
+# explicitly set HOME: random UIDs will cause HOME to be "/" generally
+ENV HOME=/opt/puppetlabs/server/data/puppetserver
+
+COPY --from=build /etc/puppetlabs     /etc/puppetlabs
+COPY --from=build /opt/puppetlabs     /opt/puppetlabs
+COPY --from=build /var/log/puppetlabs /var/log/puppetlabs
+COPY --from=build /var/run/puppetlabs /var/run/puppetlabs
+
+# In the openvoxserver/files directory, we have some files that need to be copied to the final image.
+# However, instead of copying them file by file, we create a file hierarchy similar to the system root
+# and copy the entire directory directly into the system root.
+COPY openvoxserver/files /
+
+COPY openvoxserver/prep_release_container.sh /
+COPY Containerfile /
+
+RUN bash -x /prep_release_container.sh
+
+USER puppet:0
+
+# k8s uses livenessProbe, startupProbe, readinessProbe and ignores HEALTHCHECK
+HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/healthcheck.sh"]
+
+EXPOSE 8140
+
+ENTRYPOINT ["dumb-init", "/container-entrypoint.sh"]
+CMD ["foreground"]

@@ -89,11 +89,11 @@ else
 
         # See puppet.conf file for relevant settings
         puppetserver ca setup \
-            --ca-name "$ca_name" 
+            --ca-name "$ca_name"
 
     elif [ ! -f "$new_cadir/ca_crt.pem" ] && [ -f "$ssl_dir/ca/ca_crt.pem" ]; then
         # Legacy CA upgrade
-        puppetserver ca migrate     
+        puppetserver ca migrate
         fi
   fi
 fi

@@ -57,39 +57,24 @@ jobs:
             const db_version = dbVersion.split('-')[0];
             core.setOutput('db_version', db_version);
 
-      - name: Build Ubuntu image
+      - name: Build image
         uses: docker/build-push-action@v7
         with:
           tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}'
-          context: openvoxserver
-          file: openvoxserver/Containerfile
+          context: .
+          file: Containerfile
           push: false
           platforms: linux/${{ matrix.platform }}
           build-args: |
-            OPENVOX_RELEASE=${{ matrix.release }}
             OPENVOXSERVER_VERSION=${{ matrix.server_version }}
             OPENVOXDB_VERSION=${{ matrix.db_version }}
-            R10K_VERSION=${{ matrix.r10k_version }}
-            RUGGED_VERSION=${{ matrix.rugged_version }}
-            JDK_VERSION=${{ matrix.jdk_version }}
-
-      - name: Build Alpine image
-        uses: docker/build-push-action@v7
-        with:
-          tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}-alpine'
-          context: openvoxserver
-          file: openvoxserver/Containerfile.alpine
-          push: false
-          build-args: |
-            OPENVOX_RELEASE=${{ matrix.release }}
-            OPENVOXSERVER_VERSION=${{ steps.extract_server_version.outputs.server_version }}
-            OPENVOXDB_VERSION=${{ steps.extract_db_version.outputs.db_version }}
-            R10K_VERSION=${{ matrix.r10k_version }}
-            RUGGED_VERSION=${{ matrix.rugged_version }}
+            RUBYGEM_R10K=${{ matrix.r10k_version }}
+            RUBYGEM_RUGGED=${{ matrix.rugged_version }}
             JDK_VERSION=${{ matrix.jdk_version }}
 
   tests:
     needs:
+      - setup-matrix
       - build_ci_container
     runs-on: ubuntu-latest
     name: Test suite
