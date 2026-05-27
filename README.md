@@ -20,6 +20,7 @@
 ---
 
 This project hosts the Containerfile and the required scripts to build a OpenVox Server container image.
+See the [OpenVox Packages](https://github.com/orgs/OpenVoxProject/packages) for available versions.
 
 You can run a copy of Puppet Server with the following Docker command:
 
