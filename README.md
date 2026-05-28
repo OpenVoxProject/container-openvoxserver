@@ -162,6 +162,33 @@ services:
       - ./ca-ssl:/etc/puppetlabs/puppetserver/ca
 ```
 
+### Permissions
+
+#### Podman
+
+When using Podman, make sure the container runs with the correct permissions. The OpenVox Server process starts as `root` and then drops privileges to the `puppet` user.
+This can lead to permission issues with bind mounts or volumes, especially for the OpenVox SSL and CA directories, for example:
+
+```shell
+-v ./openvoxserver-ssl:/etc/puppetlabs/puppet/ssl
+-v ./openvoxserver-ca:/etc/puppetlabs/puppetserver/
+```
+
+To avoid this, you can run Podman with user namespace mapping enabled: `--userns=keep-id`. With `podman-compose`, use:
+
+```shell
+PODMAN_USERNS=keep-id podman-compose up
+```
+
+This approach works best when using named volumes.
+
+If that doesn’t work in your setup, you can mount a custom script directory to `/container-custom-entrypoint.d/` and place a script there which adjusts permissions on the mounted directories.
+These scripts are executed on container startup, before the OpenVox Server process is launched.
+
+#### Docker
+
+These issues have not occurred with Docker so far.
+
 ## How to Release the container
 
 [see here](RELEASE.md)
