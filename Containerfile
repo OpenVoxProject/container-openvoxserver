@@ -33,12 +33,15 @@ ARG RUBYGEM_R10K=5.0.3
 # renovate: depName=rugged datasource=rubygems
 ARG RUBYGEM_RUGGED=1.9.0
 
+ENV OPENVOXSERVER_VERSION=8.13.0
+
 LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
       org.label-schema.vendor="OpenVoxProject" \
       org.label-schema.url="https://github.com/OpenVoxProject/container-openvoxserver" \
       org.label-schema.vcs-url="https://github.com/OpenVoxProject/container-openvoxserver" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.dockerfile="/Containerfile" \
+      org.label-schema.version="$OPENVOXSERVER_VERSION" \
       org.label-schema.name="OpenVox Server"
 
 ENV AUTOSIGN=true \
