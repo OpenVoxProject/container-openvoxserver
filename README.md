@@ -14,6 +14,9 @@
   - [Configuration](#configuration)
   - [Initialization Scripts](#initialization-scripts)
   - [Persistence](#persistence)
+  - [How to deploy OpenVox/Puppet code](#how-to-deploy-openvoxpuppet-code)
+    - [✅ Preferred way to deploy your code](#-preferred-way-to-deploy-your-code)
+    - [🔥 Not recommended way, but often used, pattern from the non-container world](#-not-recommended-way-but-often-used-pattern-from-the-non-container-world)
   - [How to Release the container](#how-to-release-the-container)
   - [How to contribute](#how-to-contribute)
 
@@ -188,6 +191,53 @@ These scripts are executed on container startup, before the OpenVox Server proce
 #### Docker
 
 These issues have not occurred with Docker so far.
+
+## How to deploy OpenVox/Puppet code
+
+### ✅ Preferred way to deploy your code
+
+We recommend to use the [r10k](https://github.com/voxpupuli/container-r10k) container and use a shared volume to deploy your code to the OpenVox Server.
+
+Example usage: <https://github.com/voxpupuli/crafty/blob/main/openvox/r10k/README.md>
+
+The r10k container can be scheduled to run at regular intervals to keep your OpenVox Server up to date with the latest code changes.
+Or you use the [r10k-webhook](https://github.com/voxpupuli/container-r10k-webhook) container to trigger a deployment when a new commit is pushed to your repository.
+
+### 🔥 Not recommended way, but often used, pattern from the non-container world
+
+At the moment the container has r10k installed.
+You can use it to deploy your code from within the container.
+
+🚧 ___Please be informed that this might change, and we’re considering removing the r10k installation from the container in the future.___
+
+Create a `r10k.yaml` file with the following content and mount it to the container at `/etc/puppetlabs/r10k/r10k.yaml`:
+
+```yaml
+---
+pool_size: 8
+deploy:
+  generate_types: true
+  exclude_spec: true
+  incremental: true
+  purge_levels: [ 'deployment', 'environment', 'puppetfile' ]
+cachedir: "/opt/puppetlabs/puppet/cache/r10k"
+sources:
+  puppet:
+    basedir: "/etc/puppetlabs/code/environments"
+    remote: https://github.com/voxpupuli/controlrepo.git
+```
+
+Run the main container with the following command, which mounts the `r10k.yaml` file to the container:
+
+```shell
+podman run -it --rm --name openvox -v ./r10k:/etc/puppetlabs/r10k:ro ghcr.io/openvoxproject/openvoxserver:latest
+````
+
+Then you can run the following command to deploy your code.
+
+```shell
+podman exec openvox r10k deploy environment -mv
+```
 
 ## How to Release the container
 
