@@ -2,9 +2,9 @@
 include:
   - release: 8
     # renovate: depName=openvox-server openVoxRelease=8
-    server_version: "8.13.0-1+ubuntu24.04"
+    server_version: "8.13.0-1+ubuntu26.04"
     # renovate: depName=openvoxdb openVoxRelease=8
-    db_version: "8.13.0-1+ubuntu24.04"
-    r10k_version: "5.0.0"
+    db_version: "8.13.0-1+ubuntu26.04"
+    r10k_version: "5.0.3"
     rugged_version: "1.9.0"
     jdk_version: "21"
