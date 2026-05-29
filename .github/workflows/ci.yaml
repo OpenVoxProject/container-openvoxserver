@@ -26,7 +26,7 @@ jobs:
         run: echo "build_matrix=$(bash matrix.sh build)" >> $GITHUB_OUTPUT
 
   build_ci_container:
-    name: Build ${{ matrix.platform }} CI container
+    name: Build ${{ matrix.os }} / ${{ matrix.platform }} CI container
     runs-on: ${{ matrix.runner }}
     permissions:
       security-events: write
@@ -39,7 +39,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Build ${{ matrix.os }} - ${{ matrix.platform }} CI container
+      - name: Build ${{ matrix.os }} / ${{ matrix.platform }} CI container
         uses: docker/build-push-action@v7
         with:
           tags: ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}
