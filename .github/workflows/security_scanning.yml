@@ -28,7 +28,7 @@ jobs:
         run: echo "build_matrix=$(bash matrix.sh build)" >> $GITHUB_OUTPUT
 
   scan_ci_container:
-    name: 'Scan ${{ matrix.platform }} CI container'
+    name: 'Scan ${{ matrix.os }} - ${{ matrix.platform }} CI container'
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
@@ -41,24 +41,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Extract version number
-        id: extract_version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const agentVersion = '${{ matrix.server_version }}';
-            const version = agentVersion.split('-')[0];
-            core.setOutput('version', version);
-
-      - name: Build ${{ matrix.platform }} CI container
+      - name: Build ${{ matrix.os }} - ${{ matrix.platform }} CI container
         uses: docker/build-push-action@v7
         with:
-          tags: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
+          tags: ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}
           context: .
-          file: Containerfile
-          platforms: linux/${{ matrix.platform }}
+          file: Containerfile.${{ matrix.os }}
           push: false
+          platforms: linux/${{ matrix.platform }}
           build-args: |
+            OPENVOX_RELEASE=${{ matrix.release }}
             OPENVOXSERVER_VERSION=${{ matrix.server_version }}
             OPENVOXDB_VERSION=${{ matrix.db_version }}
             RUBYGEM_R10K=${{ matrix.r10k_version }}
@@ -69,7 +61,7 @@ jobs:
         uses: anchore/scan-action@v7
         id: scan
         with:
-          image: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
+          image: 'ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}'
           fail-build: false
 
       - name: Inspect action SARIF report

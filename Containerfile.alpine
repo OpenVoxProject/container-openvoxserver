@@ -17,7 +17,7 @@ ADD https://artifacts.voxpupuli.org/openvox-server/${OPENVOXSERVER_VERSION}/open
 ADD https://artifacts.voxpupuli.org/openvoxdb/${OPENVOXDB_VERSION}/openvoxdb-${OPENVOXDB_VERSION}.tar.gz /
 
 COPY openvoxserver/prep_build_container.sh /
-RUN bash -x /prep_build_container.sh
+RUN /prep_build_container.sh
 
 ################################################################################
 FROM base AS final
@@ -92,9 +92,9 @@ COPY --from=build /var/run/puppetlabs /var/run/puppetlabs
 COPY openvoxserver/files /
 
 COPY openvoxserver/prep_release_container.sh /
-COPY Containerfile /
+COPY Containerfile.alpine /Containerfile
 
-RUN bash -x /prep_release_container.sh
+RUN /prep_release_container.sh
 
 USER puppet:0
 

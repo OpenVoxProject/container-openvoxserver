@@ -39,33 +39,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Extract server version number
-        id: extract_server_version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const serverVersion = '${{ matrix.server_version }}';
-            const server_version = serverVersion.split('-')[0];
-            core.setOutput('server_version', server_version);
-
-      - name: Extract db version number
-        id: extract_db_version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const dbVersion = '${{ matrix.db_version }}';
-            const db_version = dbVersion.split('-')[0];
-            core.setOutput('db_version', db_version);
-
-      - name: Build image
+      - name: Build ${{ matrix.os }} - ${{ matrix.platform }} CI container
         uses: docker/build-push-action@v7
         with:
-          tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}'
+          tags: ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}
           context: .
-          file: Containerfile
+          file: Containerfile.${{ matrix.os }}
           push: false
           platforms: linux/${{ matrix.platform }}
           build-args: |
+            OPENVOX_RELEASE=${{ matrix.release }}
             OPENVOXSERVER_VERSION=${{ matrix.server_version }}
             OPENVOXDB_VERSION=${{ matrix.db_version }}
             RUBYGEM_R10K=${{ matrix.r10k_version }}
