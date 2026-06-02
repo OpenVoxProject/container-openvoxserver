@@ -21,17 +21,17 @@ adduser -G puppet -u 1001 -h /opt/puppetlabs/server/data/puppetserver -H -D -s /
 chown -R puppet:puppet /etc/puppetlabs/code
 chown -R puppet:puppet /etc/puppetlabs/puppet/ssl
 chown -R puppet:puppet /etc/puppetlabs/puppetserver/ca
+chown -R puppet:puppet /opt/puppetlabs/server/data/puppetserver
 chown -R puppet:puppet /var/log/puppetlabs/puppetserver
 chown -R puppet:puppet /var/run/puppetlabs/puppetserver
-chown -R puppet:puppet /opt/puppetlabs/server/data/puppetserver
 
-chmod 0700 /var/log/puppetlabs/puppetserver
-chmod 0770 /opt/puppetlabs/server/data/puppetserver
-chmod 0750 /etc/puppetlabs/puppetserver
 chmod 0700 /opt/puppetlabs/server/data/puppetserver/jars
 chmod 0700 /opt/puppetlabs/server/data/puppetserver/yaml
+chmod 0700 /var/log/puppetlabs/puppetserver
+chmod 0750 /etc/puppetlabs/puppetserver
+chmod 0770 /opt/puppetlabs/server/data/puppetserver
+
 find /etc/puppetlabs/puppet/ssl -type d -exec chmod 0770 {} \;
-chmod +x /container-entrypoint.sh /healthcheck.sh /container-entrypoint.d/*.sh
 
 mkdir -p /opt/puppetlabs/puppet/bin
 ln -s /usr/bin/puppet /opt/puppetlabs/puppet/bin/puppet
