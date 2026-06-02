@@ -85,24 +85,6 @@ jobs:
           username: voxpupulibot
           password: ${{ secrets.DOCKERHUB_BOT_ADMIN_TOKEN }}
 
-      - name: Extract server version number
-        id: extract_server_version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const serverVersion = '${{ matrix.server_version }}';
-            const server_version = serverVersion.split('-')[0];
-            core.setOutput('server_version', server_version);
-
-      - name: Extract db version number
-        id: extract_db_version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const dbVersion = '${{ matrix.db_version }}';
-            const db_version = dbVersion.split('-')[0];
-            core.setOutput('db_version', db_version);
-
       - name: Create multi arch manifests
         run: |
           # tag will look like: ghcr.io/openvoxproject/openvoxserver:8.13.0-v1.2.3
