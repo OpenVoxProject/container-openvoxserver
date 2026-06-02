@@ -167,30 +167,36 @@ services:
 
 ### Permissions
 
-#### Podman
+#### Rootless Podman
 
-When using Podman, make sure the container runs with the correct permissions. The OpenVox Server process starts as `root` and then drops privileges to the `puppet` user.
-This can lead to permission issues with bind mounts or volumes, especially for the OpenVox SSL and CA directories, for example:
+When using rootless Podman, the OpenVox Server process starts as a virtual `root` and then drops privileges to the `puppet` user.
+This can lead to permission issues with bind mount volumes, which you may want to use for the OpenVox SSL and CA directories. For example:
 
 ```shell
 -v ./openvoxserver-ssl:/etc/puppetlabs/puppet/ssl
--v ./openvoxserver-ca:/etc/puppetlabs/puppetserver/
+-v ./openvoxserver-ca:/etc/puppetlabs/puppetserver/ca
 ```
 
-To avoid this, you can run Podman with user namespace mapping enabled: `--userns=keep-id`. With `podman-compose`, use:
+By default the container will attempt to correct permissions. For a large number of files it may spend a long time at "Adjusting mounted CA directory ownership". This is normal.
+If this still runs into permissions issues please check selinux and related security layers. You can relabel the host directory using the `:Z` flag:
 
 ```shell
-PODMAN_USERNS=keep-id podman-compose up
+-v ./openvoxserver-ca:/etc/puppetlabs/puppetserver/ca:Z
 ```
 
-This approach works best when using named volumes.
+Please be careful not to mount any vital system directories when using this flag.
 
-If that doesn’t work in your setup, you can mount a custom script directory to `/container-custom-entrypoint.d/` and place a script there which adjusts permissions on the mounted directories.
-These scripts are executed on container startup, before the OpenVox Server process is launched.
+If you're starting from scratch we instead recommend using a named volume. For example, note that the left value is not a path:
+
+```shell
+-v puppet_ca:/etc/puppetlabs/puppetserver/ca
+```
+
+Permissions are managed for you, and from there the volume can be migrated using `podman volume export` and `podman volume import` commands.
 
 #### Docker
 
-These issues have not occurred with Docker so far.
+Docker always runs rootfull, and does not need permissions adjustments.
 
 ## How to deploy OpenVox/Puppet code
 
