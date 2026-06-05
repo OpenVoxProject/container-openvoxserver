@@ -15,8 +15,8 @@ apk del --purge alpine-sdk
 
 # Create puppet user and group, and set permissions on necessary directories
 # Used for rootless execution of the container and to match permissions expected by Puppet Server
-addgroup -g 1001 puppet
-adduser -G puppet -u 1001 -h /opt/puppetlabs/server/data/puppetserver -H -D -s /sbin/nologin puppet
+addgroup -g ${OPENVOX_USER_GID} puppet
+adduser -G puppet -u ${OPENVOX_USER_UID} -h /opt/puppetlabs/server/data/puppetserver -H -D -s /sbin/nologin puppet
 
 chown -R puppet:puppet /etc/puppetlabs/code
 chown -R puppet:puppet /etc/puppetlabs/puppet/ssl

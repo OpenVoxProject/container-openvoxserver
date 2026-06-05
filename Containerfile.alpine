@@ -33,6 +33,9 @@ ARG RUBYGEM_R10K=5.0.3
 # renovate: depName=rugged datasource=rubygems
 ARG RUBYGEM_RUGGED=1.9.0
 
+ARG OPENVOX_USER_UID=1001
+ARG OPENVOX_USER_GID=1001
+
 ENV OPENVOXSERVER_VERSION=8.13.0
 
 LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
@@ -64,6 +67,8 @@ ENV AUTOSIGN=true \
     OPENVOX_REPORTS="puppetdb" \
     OPENVOX_STORECONFIGS_BACKEND="puppetdb" \
     OPENVOX_STORECONFIGS=true \
+    OPENVOX_USER_UID=${OPENVOX_USER_UID} \
+    OPENVOX_USER_GID=${OPENVOX_USER_GID} \
     OPENVOXDB_SERVER_URLS=https://openvoxdb:8081 \
     OPENVOXSERVER_ENABLE_ENV_CACHE_DEL_API=true \
     OPENVOXSERVER_ENVIRONMENT_TIMEOUT=unlimited \
