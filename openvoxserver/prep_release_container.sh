@@ -1,7 +1,7 @@
 #!/bin/bash
 
 apk update
-apk add --no-cache dumb-init alpine-sdk openssh-client openssl libssh2 ruby ruby-dev runuser coreutils gcompat
+apk add --no-cache dumb-init alpine-sdk openssh-client openssl libssh2 ruby ruby-dev runuser coreutils gcompat curl
 
 gem install --no-document hiera-eyaml:${RUBYGEM_HIERA_EYAML}
 gem install --no-document hocon:1.4.0
