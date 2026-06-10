@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 tar -x -z -f /openvox-server-${OPENVOXSERVER_VERSION}.tar.gz -C /
 tar -x -z -f /openvoxdb-${OPENVOXDB_VERSION}.tar.gz -C /
 

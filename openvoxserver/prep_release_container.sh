@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 apk update
 apk add --no-cache dumb-init alpine-sdk openssh-client openssl libssh2 ruby ruby-dev runuser coreutils gcompat curl
 
