@@ -36,7 +36,7 @@ ARG RUBYGEM_RUGGED=1.9.0
 ARG OPENVOX_USER_UID=1001
 ARG OPENVOX_USER_GID=1001
 
-ENV OPENVOXSERVER_VERSION=8.13.0
+ARG OPENVOXSERVER_VERSION=8.13.0
 
 LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
       org.label-schema.vendor="OpenVoxProject" \
