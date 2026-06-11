@@ -1,7 +1,7 @@
 FROM alpine:3.23 AS base
 
 # Install JDK
-ARG JDK_VERSION=25
+ARG JDK_VERSION=21
 RUN apk update && apk upgrade \
     && apk add --no-cache openjdk${JDK_VERSION}-jre-headless bash tar xz \
     && rm -rf /var/cache/apk/*
