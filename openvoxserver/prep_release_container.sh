@@ -43,7 +43,7 @@ ln -s /usr/bin/gem /opt/puppetlabs/puppet/bin/gem
 ln -s /usr/bin/irb /opt/puppetlabs/puppet/bin/irb
 ln -s /usr/bin/erb /opt/puppetlabs/puppet/bin/erb
 ln -s /usr/bin/r10k /opt/puppetlabs/puppet/bin/r10k
-ln -s /usr/bin/hiera-eyaml /opt/puppetlabs/puppet/bin/hiera-eyaml
+ln -s /usr/bin/eyaml /opt/puppetlabs/puppet/bin/eyaml
 
 # install puppet gem as library into jruby loadpath
 puppetserver gem install --no-document openvox:${RUBYGEM_OPENVOX}
