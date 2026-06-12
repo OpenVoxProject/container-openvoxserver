@@ -51,8 +51,8 @@ jobs:
             OPENVOX_RELEASE=${{ matrix.release }}
             OPENVOXSERVER_VERSION=${{ matrix.server_version }}
             OPENVOXDB_VERSION=${{ matrix.db_version }}
-            RUBYGEM_R10K=${{ matrix.r10k_version }}
-            RUBYGEM_RUGGED=${{ matrix.rugged_version }}
+            RUBYGEM_R10K=${{ matrix.rubygem_r10k }}
+            RUBYGEM_RUGGED=${{ matrix.rubygem_rugged }}
             JDK_VERSION=${{ matrix.jdk_version }}
           build_arch: linux/${{ matrix.platform }}
           build_context: .

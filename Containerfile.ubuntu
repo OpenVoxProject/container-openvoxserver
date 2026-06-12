@@ -14,7 +14,9 @@ FROM base AS build
 
 ARG RUGGED_DEPS="libgit2-1.9 libjitterentropy3-dev libzstd-dev"
 ARG BUILD_PKGS="ruby3.3-dev gcc make cmake pkg-config libssl-dev libc6-dev libssh2-1-dev ${RUGGED_DEPS}"
+# renovate: depName=r10k datasource=rubygems
 ARG RUBYGEM_R10K=5.0.3
+# renovate: depName=rugged datasource=rubygems
 ARG RUBYGEM_RUGGED=1.9.0
 
 RUN apt update \
@@ -27,9 +29,11 @@ RUN apt update \
 FROM base AS final
 
 ARG PACKAGES="git netbase openssh-client libssh2-1 dumb-init ruby3.3"
-ARG UBUNTU_VERSION=26.04
+ARG UBUNTU_VERSION
 ARG OPENVOX_RELEASE=8
+# renovate: datasource=custom.voxpupuli-artifacts depName=openvox-server
 ARG OPENVOXSERVER_VERSION=8.13.0
+# renovate: datasource=custom.voxpupuli-artifacts depName=openvoxdb
 ARG OPENVOXDB_VERSION=8.13.0
 ARG OPENVOX_USER_UID=999
 ARG OPENVOX_USER_GID=999
