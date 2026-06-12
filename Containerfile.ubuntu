@@ -1,26 +1,40 @@
+### BASE #############################################################################
 ARG UBUNTU_VERSION=26.04
-FROM ubuntu:${UBUNTU_VERSION} AS builder
+
+FROM ubuntu:${UBUNTU_VERSION} AS base
+
+RUN apt update \
+    && apt upgrade -y --no-install-recommends \
+    && apt install -y --no-install-recommends ca-certificates  \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+
+### BUILD #############################################################################
+FROM base AS build
 
 ARG RUGGED_DEPS="libgit2-1.9 libjitterentropy3-dev libzstd-dev"
 ARG BUILD_PKGS="ruby3.3-dev gcc make cmake pkg-config libssl-dev libc6-dev libssh2-1-dev ${RUGGED_DEPS}"
-ARG R10K_VERSION=5.0.3
-ARG RUGGED_VERSION=1.9.0
+# renovate: depName=r10k datasource=rubygems
+ARG RUBYGEM_R10K=5.0.3
+# renovate: depName=rugged datasource=rubygems
+ARG RUBYGEM_RUGGED=1.9.0
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends $BUILD_PKGS && \
-    gem install --no-doc r10k -v $R10K_VERSION && \
-    gem install --no-doc rugged -v $RUGGED_VERSION -- --with-ssh
+RUN apt update \
+    && apt install -y --no-install-recommends $BUILD_PKGS \
+    && gem install --no-doc r10k -v $RUBYGEM_R10K \
+    && gem install --no-doc rugged -v $RUBYGEM_RUGGED -- --with-ssh
 
-FROM ubuntu:${UBUNTU_VERSION} AS final
+### FINAL #############################################################################
 
-ARG vcs_ref
-ARG build_type
-ARG build_date
+FROM base AS final
+
 ARG PACKAGES="git netbase openssh-client libssh2-1 dumb-init ruby3.3"
-ARG UBUNTU_VERSION=26.04
+ARG UBUNTU_VERSION
 ARG OPENVOX_RELEASE=8
-ARG OPENVOXSERVER_VERSION=8.13.0-1+ubuntu${UBUNTU_VERSION}
-ARG OPENVOXDB_VERSION=8.13.0-1+ubuntu${UBUNTU_VERSION}
+# renovate: datasource=custom.voxpupuli-artifacts depName=openvox-server
+ARG OPENVOXSERVER_VERSION=8.13.0
+# renovate: datasource=custom.voxpupuli-artifacts depName=openvoxdb
+ARG OPENVOXDB_VERSION=8.13.0
 ARG OPENVOX_USER_UID=999
 ARG OPENVOX_USER_GID=999
 ARG OPENVOX_RELEASE_PACKAGE=openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb
@@ -31,10 +45,8 @@ LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
       org.label-schema.vcs-url="https://github.com/OpenVoxProject/container-openvoxserver" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.dockerfile="/Containerfile" \
-      org.label-schema.name="OpenVox Server ($build_type)" \
-      org.label-schema.version="$OPENVOXSERVER_VERSION" \
-      org.label-schema.vcs-ref="$vcs_ref" \
-      org.label-schema.build-date="$build_date"
+      org.label-schema.name="OpenVox Server" \
+      org.label-schema.version="$OPENVOXSERVER_VERSION"
 
 ENV AUTOSIGN=true \
     CA_ALLOW_SUBJECT_ALT_NAMES=false \
@@ -73,50 +85,34 @@ ENV AUTOSIGN=true \
     SSLDIR=/etc/puppetlabs/puppet/ssl \
     USE_OPENVOXDB=true
 
-COPY container-entrypoint.sh \
-     docker-entrypoint.sh \
-     healthcheck.sh \
-     Containerfile \
-     /
+COPY Containerfile.ubuntu /Containerfile
+COPY --from=build /var/lib/gems/ /var/lib/gems/
+COPY --from=build /usr/local/bin/r10k /usr/local/bin/
 
-COPY container-entrypoint.d /container-entrypoint.d
-COPY --from=builder /var/lib/gems/ /var/lib/gems/
-COPY --from=builder /usr/local/bin/r10k /usr/local/bin/
+ADD https://apt.voxpupuli.org/${OPENVOX_RELEASE_PACKAGE} /
 
-ADD https://apt.voxpupuli.org/openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb /
-RUN apt-get update && \
-    apt-get install -y ca-certificates /${OPENVOX_RELEASE_PACKAGE} && \
+RUN apt install -y /${OPENVOX_RELEASE_PACKAGE} && \
     rm /${OPENVOX_RELEASE_PACKAGE}
 
-RUN groupadd -g ${OPENVOX_USER_GID} puppet && \
-    useradd -m -u ${OPENVOX_USER_UID} -g puppet puppet && \
-    chmod +x /container-entrypoint.sh /docker-entrypoint.sh /healthcheck.sh /container-entrypoint.d/*.sh && \
-    apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y \
+RUN groupadd -g ${OPENVOX_USER_GID} puppet \
+    && useradd -m -u ${OPENVOX_USER_UID} -g puppet puppet \
+    && apt update \
+    && apt install -y \
         $PACKAGES \
-        openvoxdb-termini=${OPENVOXDB_VERSION} \
-        openvox-server=${OPENVOXSERVER_VERSION} \
-        && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    cp -pr /etc/puppetlabs/puppet /var/tmp && \
-    cp -pr /opt/puppetlabs/server/data/puppetserver /var/tmp && \
-    rm -rf /var/tmp/puppet/ssl
+        openvoxdb-termini=${OPENVOXDB_VERSION}-1+ubuntu${UBUNTU_VERSION} \
+        openvox-server=${OPENVOXSERVER_VERSION}-1+ubuntu${UBUNTU_VERSION} \
+    && apt autoremove -y \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && cp -pr /etc/puppetlabs/puppet /var/tmp \
+    && cp -pr /opt/puppetlabs/server/data/puppetserver /var/tmp \
+    && rm -rf /var/tmp/puppet/ssl
 
-# needs to be copied after package installation
-COPY puppetserver /etc/default/puppetserver
-
-COPY logback.xml \
-     request-logging.xml \
-     /etc/puppetlabs/puppetserver/
-
-COPY conf.d/puppetserver.conf \
-     conf.d/product.conf \
-     /etc/puppetlabs/puppetserver/conf.d/
-
-COPY puppetdb.conf /var/tmp/puppet/
+# The files need to be copied after package installation.
+# In the openvoxserver/files directory, we have some files that need to be copied to the final image.
+# However, instead of copying them file by file, we create a file hierarchy similar to the system root
+# and copy the entire directory directly into the system root.
+COPY openvoxserver/files /
 
 # k8s uses livenessProbe, startupProbe, readinessProbe and ignores HEALTHCHECK
 HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/healthcheck.sh"]

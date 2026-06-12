@@ -9,30 +9,43 @@
       "customType": "regex",
       "datasourceTemplate": "rubygems",
       "managerFilePatterns": [
-        "/build_versions.yaml/"
+        "/(^|/)Containerfile\\.(?:alpine|ubuntu)$/",
+        "/(^|/)build_versions\\.yaml$/"
       ],
       "matchStrings": [
-        "rubygem_(?<depName>[a-z0-9_-]+):\\s+'(?<currentValue>\\d+\\.\\d+\\.\\d+)'"
+        "rubygem_(?<depName>[a-z0-9_-]+):\\s*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"",
+        "#\\s*renovate:\\s*depName=(?<depName>[a-z0-9_-]+)\\s+datasource=rubygems\\s*\\n\\s*ARG\\s+RUBYGEM_[A-Z0-9_]+=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ]
     },
     {
       "customType": "regex",
-      "datasourceTemplate": "deb",
       "managerFilePatterns": [
-        "/build_versions.yaml/"
+        "/(^|/)Containerfile\\.(?:alpine|ubuntu)$/",
+        "/(^|/)build_versions\\.yaml$/"
       ],
       "matchStrings": [
-        "#\\s*renovate:\\s*depName=(?<depName>.*?)\\s*openVoxRelease=(?<openVoxRelease>\\d+)\\s*\\n\\s*(?<key>\\w+_version):\\s*\"(?<currentValue>.*?)\""
+        "#\\s*renovate:\\s*datasource=(?<datasource>custom\\.voxpupuli-artifacts)\\s+depName=(?<depName>openvox(?:-server|db))\\s*\\n\\s*(?:ARG\\s+OPENVOX(?:SERVER|DB)_VERSION=|(?:server|db)_version:\\s*\")(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ],
-      "registryUrlTemplate": "https://apt.voxpupuli.org?suite=ubuntu24.04&components=openvox{{openVoxRelease}}&binaryArch=amd64"
+      "versioningTemplate": "semver"
     }
   ],
+  "customDatasources": {
+    "voxpupuli-artifacts": {
+      "defaultRegistryUrlTemplate": "https://artifacts.voxpupuli.org/{{packageName}}/",
+      "format": "html"
+    }
+  },
   "extends": [ "config:recommended", ":prImmediately" ],
   "vulnerabilityAlerts": {
     "addLabels": [ "security" ],
     "enabled": true
   },
   "packageRules": [
+    {
+      "matchDatasources": ["custom.voxpupuli-artifacts"],
+      "allowedVersions": "/^8\\./",
+      "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)/$"
+    },
     {
       "matchPackagePatterns": [".*"],
       "dependencyDashboardApproval": false

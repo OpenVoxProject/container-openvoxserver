@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: security-scanning-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read # minimal required permissions to clone repo
 
@@ -28,7 +32,7 @@ jobs:
         run: echo "build_matrix=$(bash matrix.sh build)" >> $GITHUB_OUTPUT
 
   scan_ci_container:
-    name: 'Scan ${{ matrix.platform }} CI container'
+    name: 'Scan ${{ matrix.os }} / ${{ matrix.platform }} CI container'
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
@@ -36,41 +40,34 @@ jobs:
       security-events: write
     needs: setup-matrix
     strategy:
+      fail-fast: false
       matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Extract version number
-        id: extract_version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const agentVersion = '${{ matrix.server_version }}';
-            const version = agentVersion.split('-')[0];
-            core.setOutput('version', version);
-
-      - name: Build ${{ matrix.platform }} CI container
+      - name: Build ${{ matrix.os }} / ${{ matrix.platform }} CI container
         uses: docker/build-push-action@v7
         with:
-          tags: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
-          context: openvoxserver
-          file: openvoxserver/Containerfile
-          platforms: linux/${{ matrix.platform }}
+          tags: ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}
+          context: .
+          file: Containerfile.${{ matrix.os }}
+          load: true
           push: false
+          platforms: linux/${{ matrix.platform }}
           build-args: |
             OPENVOX_RELEASE=${{ matrix.release }}
             OPENVOXSERVER_VERSION=${{ matrix.server_version }}
             OPENVOXDB_VERSION=${{ matrix.db_version }}
-            R10K_VERSION=${{ matrix.r10k_version }}
-            RUGGED_VERSION=${{ matrix.rugged_version }}
+            RUBYGEM_R10K=${{ matrix.rubygem_r10k }}
+            RUBYGEM_RUGGED=${{ matrix.rubygem_rugged }}
             JDK_VERSION=${{ matrix.jdk_version }}
 
       - name: Scan image with Anchore Grype
         uses: anchore/scan-action@v7
         id: scan
         with:
-          image: 'ci/openvoxserver:${{ steps.extract_version.outputs.version }}'
+          image: 'ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}'
           fail-build: false
 
       - name: Inspect action SARIF report
@@ -80,3 +77,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
+          category: grype-${{ matrix.os }}-${{ matrix.platform }}

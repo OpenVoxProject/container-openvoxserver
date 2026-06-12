@@ -7,6 +7,10 @@ on:
       - 'main'
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read # minimal required permissions to clone repo
 
@@ -26,70 +30,35 @@ jobs:
         run: echo "build_matrix=$(bash matrix.sh build)" >> $GITHUB_OUTPUT
 
   build_ci_container:
-    name: Build ${{ matrix.platform }} CI container
+    name: Build ${{ matrix.os }} / ${{ matrix.platform }} CI container
     runs-on: ${{ matrix.runner }}
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
     needs: setup-matrix
     strategy:
+      fail-fast: false
       matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Extract server version number
-        id: extract_server_version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const serverVersion = '${{ matrix.server_version }}';
-            const server_version = serverVersion.split('-')[0];
-            core.setOutput('server_version', server_version);
-
-      - name: Extract db version number
-        id: extract_db_version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const dbVersion = '${{ matrix.db_version }}';
-            const db_version = dbVersion.split('-')[0];
-            core.setOutput('db_version', db_version);
-
-      - name: Build Ubuntu image
+      - name: Build ${{ matrix.os }} / ${{ matrix.platform }} CI container
         uses: docker/build-push-action@v7
         with:
-          tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}'
-          context: openvoxserver
-          file: openvoxserver/Containerfile
+          tags: ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}
+          context: .
+          file: Containerfile.${{ matrix.os }}
           push: false
           platforms: linux/${{ matrix.platform }}
           build-args: |
             OPENVOX_RELEASE=${{ matrix.release }}
             OPENVOXSERVER_VERSION=${{ matrix.server_version }}
             OPENVOXDB_VERSION=${{ matrix.db_version }}
-            R10K_VERSION=${{ matrix.r10k_version }}
-            RUGGED_VERSION=${{ matrix.rugged_version }}
-            JDK_VERSION=${{ matrix.jdk_version }}
-
-      - name: Build Alpine image
-        uses: docker/build-push-action@v7
-        with:
-          tags: 'ci/openvoxserver:${{ steps.extract_server_version.outputs.server_version }}-alpine'
-          context: openvoxserver
-          file: openvoxserver/Containerfile.alpine
-          push: false
-          build-args: |
-            OPENVOX_RELEASE=${{ matrix.release }}
-            OPENVOXSERVER_VERSION=${{ steps.extract_server_version.outputs.server_version }}
-            OPENVOXDB_VERSION=${{ steps.extract_db_version.outputs.db_version }}
-            R10K_VERSION=${{ matrix.r10k_version }}
-            RUGGED_VERSION=${{ matrix.rugged_version }}
+            RUBYGEM_R10K=${{ matrix.rubygem_r10k }}
+            RUBYGEM_RUGGED=${{ matrix.rubygem_rugged }}
             JDK_VERSION=${{ matrix.jdk_version }}
 
   tests:
     needs:
+      - setup-matrix
       - build_ci_container
     runs-on: ubuntu-latest
     name: Test suite
@@ -99,11 +68,12 @@ jobs:
   dependabot:
     permissions:
       contents: write
+      pull-requests: write
     name: 'Dependabot auto-merge'
     needs:
       - tests
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'}}
+    if: github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
     steps:
       - name: Dependabot metadata
         id: metadata
@@ -115,4 +85,4 @@ jobs:
         run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
