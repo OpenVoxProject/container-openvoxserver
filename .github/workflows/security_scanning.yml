@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: security-scanning-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read # minimal required permissions to clone repo
 
@@ -36,6 +40,7 @@ jobs:
       security-events: write
     needs: setup-matrix
     strategy:
+      fail-fast: false
       matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
       - name: Checkout repository
@@ -47,6 +52,7 @@ jobs:
           tags: ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}
           context: .
           file: Containerfile.${{ matrix.os }}
+          load: true
           push: false
           platforms: linux/${{ matrix.platform }}
           build-args: |
@@ -71,3 +77,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
+          category: grype-${{ matrix.os }}-${{ matrix.platform }}

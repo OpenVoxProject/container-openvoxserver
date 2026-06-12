@@ -7,6 +7,10 @@ on:
       - 'main'
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read # minimal required permissions to clone repo
 
@@ -28,12 +32,9 @@ jobs:
   build_ci_container:
     name: Build ${{ matrix.os }} / ${{ matrix.platform }} CI container
     runs-on: ${{ matrix.runner }}
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
     needs: setup-matrix
     strategy:
+      fail-fast: false
       matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
       - name: Checkout repository
@@ -67,11 +68,12 @@ jobs:
   dependabot:
     permissions:
       contents: write
+      pull-requests: write
     name: 'Dependabot auto-merge'
     needs:
       - tests
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'}}
+    if: github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
     steps:
       - name: Dependabot metadata
         id: metadata
@@ -83,4 +85,4 @@ jobs:
         run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}

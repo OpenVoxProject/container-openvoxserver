@@ -14,6 +14,9 @@
   - [Configuration](#configuration)
   - [Initialization Scripts](#initialization-scripts)
   - [Persistence](#persistence)
+    - [Permissions](#permissions)
+      - [Rootless Podman](#rootless-podman)
+      - [Docker](#docker)
   - [How to deploy OpenVox/Puppet code](#how-to-deploy-openvoxpuppet-code)
     - [✅ Preferred way to deploy your code](#-preferred-way-to-deploy-your-code)
     - [🔥 Not recommended way, but often used, pattern from the non-container world](#-not-recommended-way-but-often-used-pattern-from-the-non-container-world)
@@ -28,7 +31,7 @@ See the [OpenVox Packages](https://github.com/orgs/OpenVoxProject/packages) for 
 You can run a copy of Puppet Server with the following Docker command:
 
 ```bash
-podman run --name openvox --hostname openvox ghcr.io/openvoxproject/openvoxserver:8.8.0-latest
+podman run --name openvox --hostname openvox ghcr.io/openvoxproject/openvoxserver:8.13.0
 ```
 
 Although it is not strictly necessary to name the container `openvox`, this is
@@ -39,7 +42,7 @@ If you would like to start the OpenVox Server with your own Puppet code, you can
 mount your own directory at `/etc/puppetlabs/code`:
 
 ```shell
-podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code ghcr.io/openvoxproject/openvoxserver:8.8.0-latest
+podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code ghcr.io/openvoxproject/openvoxserver:8.13.0
 ```
 
 For compose file see: [CRAFTY](https://github.com/voxpupuli/crafty/tree/main/openvox/oss)
@@ -70,26 +73,32 @@ Another option is to disable the environment caching by setting the `OPENVOXSERV
 
 ## Version schema
 
-The version schema has the following layout:
+Images are published to `ghcr.io/openvoxproject/openvoxserver` and `docker.io/voxpupuli/openvoxserver`.
+Ubuntu is the default image variant and therefore has no operating system suffix.
+Alpine images use the `-alpine` suffix.
 
-```text
-<openvox.major>.<openvox.minor>.<openvox.patch>-v<container.major>.<container.minor>.<container.patch>
-```
+| Tag | Example | Description |
+| --- | --- | --- |
+| `<openvox.version>-v<container.version>` | `8.13.0-v1.2.3` | Immutable Ubuntu container release |
+| `<openvox.version>-v<container.version>-alpine` | `8.13.0-v1.2.3-alpine` | Immutable Alpine container release |
+| `<openvox.version>` | `8.13.0` | Latest build for an OpenVox version, using Ubuntu |
+| `<openvox.version>-alpine` | `8.13.0-alpine` | Latest Alpine build for an OpenVox version |
+| `<openvox.major>` | `8` | Latest build for an OpenVox major version, using Ubuntu |
+| `<openvox.major>-alpine` | `8-alpine` | Latest Alpine build for an OpenVox major version |
+| `latest` | `latest` | Latest Ubuntu build from the `main` branch |
+| `latest-alpine` | `latest-alpine` | Latest Alpine build from the `main` branch |
 
-Example usage:
+Builds from the `main` branch are additionally tagged as
+`<openvox.version>-main` and `<openvox.version>-main-alpine`.
+
+Example using an immutable container release:
 
 ```shell
-podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code/ ghcr.io/openvoxproject/openvoxserver:8.8.0-v1.0.0
+podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code/ ghcr.io/openvoxproject/openvoxserver:8.13.0-v1.2.3
 ```
 
-| Name            | Description                                                                               |
-| --------------- | ----------------------------------------------------------------------------------------- |
-| openvox.major   | Describes the contained major OpenVox version                                             |
-| openvox.minor   | Describes the contained minor OpenVox version                                             |
-| openvox.patch   | Describes the contained patchlevel OpenVox version                                        |
-| container.major | Describes the major version of the base container (Ubunutu 24.04) or incompatible changes |
-| container.minor | Describes new features or refactoring with backward compatibility                         |
-| container.patch | Describes if minor changes or bugfixes have been implemented                              |
+The OpenVox version describes the server version contained in the image.
+The container version follows semantic versioning and describes changes to the container image independently of the OpenVox version.
 
 ## Configuration
 
@@ -151,7 +160,7 @@ To prevent this, you can persist the default cadir, `/etc/puppetlabs/puppetserve
 For example:
 
 ```shell
-podman run -v $PWD/ca-ssl:/etc/puppetlabs/puppetserver/ca ghcr.io/openvoxproject/openvoxserver:8.6.1-latest
+podman run -v $PWD/ca-ssl:/etc/puppetlabs/puppetserver/ca ghcr.io/openvoxproject/openvoxserver:8.13.0
 ```
 
 or in compose:
@@ -159,7 +168,7 @@ or in compose:
 ```yaml
 services:
   puppet:
-    image: ghcr.io/openvoxproject/openvoxserver:8.8.0-latest
+    image: ghcr.io/openvoxproject/openvoxserver:8.13.0
     # ...
     volumes:
       - ./ca-ssl:/etc/puppetlabs/puppetserver/ca
