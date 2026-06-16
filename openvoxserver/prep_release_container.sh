@@ -43,6 +43,7 @@ gem install --no-document hocon:1.4.0
 gem install --no-document openvox:${RUBYGEM_OPENVOX}
 gem install --no-document openvoxserver-ca:${RUBYGEM_OPENVOXSERVER_CA}
 gem install --no-document r10k:${RUBYGEM_R10K}
+gem install --no-document rugged:${RUBYGEM_RUGGED} -- --with-ssh
 gem install --no-document racc:1.8.1
 gem install --no-document syslog:0.4.0
 
