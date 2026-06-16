@@ -4,7 +4,19 @@ set -e
 
 if command -v apk > /dev/null 2>&1; then
   apk update
-  apk add --no-cache dumb-init alpine-sdk openssh-client openssl libssh2 ruby ruby-dev runuser coreutils gcompat curl
+  apk add --no-cache \
+    dumb-init \
+    alpine-sdk \
+    openssh-client \
+    openssl \
+    libssh2 \
+    ruby \
+    ruby-dev \
+    runuser \
+    coreutils \
+    gcompat \
+    curl \
+    git
 elif command -v apt-get > /dev/null 2>&1; then
   apt-get update
   apt-get install -y --no-install-recommends \
@@ -19,7 +31,8 @@ elif command -v apt-get > /dev/null 2>&1; then
     netbase \
     ruby \
     ruby-dev \
-    util-linux
+    util-linux \
+    git
 else
   echo "Unsupported package manager" >&2
   exit 1
