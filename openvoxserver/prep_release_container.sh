@@ -6,15 +6,19 @@ if command -v apk > /dev/null 2>&1; then
   apk update
   apk add --no-cache \
     alpine-sdk \
-    coreutils \
     cmake \
+    coreutils \
     curl \
     dumb-init \
     gcompat \
     git \
+    jitterentropy-library-dev \
     libssh2 \
+    libssh2-dev \
+    zstd-dev \
     openssh-client \
     openssl \
+    ruby-pkg-config \
     ruby \
     ruby-dev \
     runuser
@@ -23,15 +27,18 @@ elif command -v apt-get > /dev/null 2>&1; then
   apt-get install -y --no-install-recommends \
     build-essential \
     ca-certificates \
-    coreutils \
     cmake \
+    coreutils \
     curl \
     dumb-init \
     git \
+    libjitterentropy3-dev \
     libssh2-1-dev \
+    libzstd-dev \
     netbase \
     openssh-client \
     openssl \
+    pkg-config \
     ruby \
     ruby-dev \
     util-linux
