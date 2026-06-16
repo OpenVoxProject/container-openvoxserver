@@ -5,34 +5,36 @@ set -e
 if command -v apk > /dev/null 2>&1; then
   apk update
   apk add --no-cache \
-    dumb-init \
     alpine-sdk \
+    coreutils \
+    cmake \
+    curl \
+    dumb-init \
+    gcompat \
+    git \
+    libssh2 \
     openssh-client \
     openssl \
-    libssh2 \
     ruby \
     ruby-dev \
-    runuser \
-    coreutils \
-    gcompat \
-    curl \
-    git
+    runuser
 elif command -v apt-get > /dev/null 2>&1; then
   apt-get update
   apt-get install -y --no-install-recommends \
     build-essential \
     ca-certificates \
     coreutils \
+    cmake \
     curl \
     dumb-init \
+    git \
     libssh2-1-dev \
+    netbase \
     openssh-client \
     openssl \
-    netbase \
     ruby \
     ruby-dev \
-    util-linux \
-    git
+    util-linux
 else
   echo "Unsupported package manager" >&2
   exit 1
