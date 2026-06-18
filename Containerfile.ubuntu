@@ -1,43 +1,54 @@
-### BASE #############################################################################
 ARG UBUNTU_VERSION=26.04
 
 FROM ubuntu:${UBUNTU_VERSION} AS base
 
-RUN apt update \
-    && apt upgrade -y --no-install-recommends \
-    && apt install -y --no-install-recommends ca-certificates  \
-    && apt clean \
+# Install JDK
+ARG JDK_VERSION=21
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        openjdk-${JDK_VERSION}-jre-headless \
+        tar \
+        xz-utils \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-### BUILD #############################################################################
+################################################################################
+
 FROM base AS build
 
-ARG RUGGED_DEPS="libgit2-1.9 libjitterentropy3-dev libzstd-dev"
-ARG BUILD_PKGS="ruby3.3-dev gcc make cmake pkg-config libssl-dev libc6-dev libssh2-1-dev ${RUGGED_DEPS}"
-# renovate: depName=r10k datasource=rubygems
-ARG RUBYGEM_R10K=5.0.3
-# renovate: depName=rugged datasource=rubygems
-ARG RUBYGEM_RUGGED=1.9.0
-
-RUN apt update \
-    && apt install -y --no-install-recommends $BUILD_PKGS \
-    && gem install --no-doc r10k -v $RUBYGEM_R10K \
-    && gem install --no-doc rugged -v $RUBYGEM_RUGGED -- --with-ssh
-
-### FINAL #############################################################################
-
-FROM base AS final
-
-ARG PACKAGES="git netbase openssh-client libssh2-1 dumb-init ruby3.3"
-ARG UBUNTU_VERSION
-ARG OPENVOX_RELEASE=8
 # renovate: datasource=custom.voxpupuli-artifacts depName=openvox-server
 ARG OPENVOXSERVER_VERSION=8.13.0
 # renovate: datasource=custom.voxpupuli-artifacts depName=openvoxdb
 ARG OPENVOXDB_VERSION=8.13.0
-ARG OPENVOX_USER_UID=999
-ARG OPENVOX_USER_GID=999
-ARG OPENVOX_RELEASE_PACKAGE=openvox${OPENVOX_RELEASE}-release-ubuntu${UBUNTU_VERSION}.deb
+
+ADD https://artifacts.voxpupuli.org/openvox-server/${OPENVOXSERVER_VERSION}/openvox-server-${OPENVOXSERVER_VERSION}.tar.gz /
+ADD https://artifacts.voxpupuli.org/openvoxdb/${OPENVOXDB_VERSION}/openvoxdb-${OPENVOXDB_VERSION}.tar.gz /
+
+COPY openvoxserver/prep_build_container.sh /
+RUN /prep_build_container.sh
+
+################################################################################
+FROM base AS final
+
+# renovate: datasource=rubygems depName=hiera-eyaml
+ARG RUBYGEM_HIERA_EYAML=5.0.1
+# renovate: datasource=rubygems depName=openvox
+ARG RUBYGEM_OPENVOX=8.27.0
+# renovate: datasource=rubygems depName=openvoxserver-ca
+ARG RUBYGEM_OPENVOXSERVER_CA=3.2.0
+# renovate: datasource=rubygems depName=r10k
+ARG RUBYGEM_R10K=5.0.3
+# renovate: datasource=rubygems depName=rugged
+ARG RUBYGEM_RUGGED=1.9.0
+
+ARG OPENVOX_USER_UID=1001
+ARG OPENVOX_USER_GID=1001
+
+# renovate: datasource=custom.voxpupuli-artifacts depName=openvox-server
+ARG OPENVOXSERVER_VERSION=8.13.0
 
 LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
       org.label-schema.vendor="OpenVoxProject" \
@@ -45,8 +56,8 @@ LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
       org.label-schema.vcs-url="https://github.com/OpenVoxProject/container-openvoxserver" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.dockerfile="/Containerfile" \
-      org.label-schema.name="OpenVox Server" \
-      org.label-schema.version="$OPENVOXSERVER_VERSION"
+      org.label-schema.version="$OPENVOXSERVER_VERSION" \
+      org.label-schema.name="OpenVox Server"
 
 ENV AUTOSIGN=true \
     CA_ALLOW_SUBJECT_ALT_NAMES=false \
@@ -82,42 +93,31 @@ ENV AUTOSIGN=true \
     OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE=0 \
     OPENVOXSERVER_PORT=8140 \
     PATH=$PATH:/opt/puppetlabs/server/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin \
-    SSLDIR=/etc/puppetlabs/puppet/ssl \
     USE_OPENVOXDB=true
 
-COPY Containerfile.ubuntu /Containerfile
-COPY --from=build /var/lib/gems/ /var/lib/gems/
-COPY --from=build /usr/local/bin/r10k /usr/local/bin/
+# explicitly set HOME: random UIDs will cause HOME to be "/" generally
+ENV HOME=/opt/puppetlabs/server/data/puppetserver
 
-ADD https://apt.voxpupuli.org/${OPENVOX_RELEASE_PACKAGE} /
+COPY --from=build /etc/puppetlabs     /etc/puppetlabs
+COPY --from=build /opt/puppetlabs     /opt/puppetlabs
+COPY --from=build /var/log/puppetlabs /var/log/puppetlabs
+COPY --from=build /var/run/puppetlabs /var/run/puppetlabs
 
-RUN apt install -y /${OPENVOX_RELEASE_PACKAGE} && \
-    rm /${OPENVOX_RELEASE_PACKAGE}
-
-RUN groupadd -g ${OPENVOX_USER_GID} puppet \
-    && useradd -m -u ${OPENVOX_USER_UID} -g puppet puppet \
-    && apt update \
-    && apt install -y \
-        $PACKAGES \
-        openvoxdb-termini=${OPENVOXDB_VERSION}-1+ubuntu${UBUNTU_VERSION} \
-        openvox-server=${OPENVOXSERVER_VERSION}-1+ubuntu${UBUNTU_VERSION} \
-    && apt autoremove -y \
-    && apt clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && cp -pr /etc/puppetlabs/puppet /var/tmp \
-    && cp -pr /opt/puppetlabs/server/data/puppetserver /var/tmp \
-    && rm -rf /var/tmp/puppet/ssl
-
-# The files need to be copied after package installation.
 # In the openvoxserver/files directory, we have some files that need to be copied to the final image.
 # However, instead of copying them file by file, we create a file hierarchy similar to the system root
 # and copy the entire directory directly into the system root.
 COPY openvoxserver/files /
 
+COPY openvoxserver/prep_release_container.sh /
+COPY Containerfile.ubuntu /Containerfile
+
+RUN /prep_release_container.sh
+
+USER puppet:0
+
 # k8s uses livenessProbe, startupProbe, readinessProbe and ignores HEALTHCHECK
 HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/healthcheck.sh"]
 
-# NOTE: this is just documentation on defaults
 EXPOSE 8140
 
 ENTRYPOINT ["dumb-init", "/container-entrypoint.sh"]
