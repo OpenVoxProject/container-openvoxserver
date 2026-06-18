@@ -24,7 +24,7 @@ jobs:
       tag_matrix: ${{ steps.set-tag-matrix.outputs.tag_matrix }}
     steps:
       - name: Source checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 'Setup yq'
         uses: dcarbone/install-yq-action@v1.3.1
@@ -45,7 +45,7 @@ jobs:
       matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Build ${{ matrix.os }} / ${{ matrix.platform }} container
         uses: voxpupuli/gha-build-and-publish-a-container@v2
@@ -143,7 +143,7 @@ jobs:
       - create-multi-arch-manifests
     steps:
       - name: Source checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v5
