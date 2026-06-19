@@ -1,8 +1,7 @@
 ---
-.github/workflows/ci.yml:
+:global:
   matrix_command: bash matrix.sh build
   matrix_requires_yq: true
-  build_job_name: 'Build ${{ matrix.os }} / ${{ matrix.platform }} CI container'
   build_runner: '${{ matrix.runner }}'
   build_file: 'Containerfile.${{ matrix.os }}'
   image_tag: 'ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}'
@@ -14,3 +13,60 @@
     - 'RUBYGEM_R10K=${{ matrix.rubygem_r10k }}'
     - 'RUBYGEM_RUGGED=${{ matrix.rubygem_rugged }}'
     - 'JDK_VERSION=${{ matrix.jdk_version }}'
+.github/workflows/ci.yml:
+  build_job_name: 'Build ${{ matrix.os }} / ${{ matrix.platform }} CI container'
+.github/workflows/security_scanning.yml:
+  scan_job_name: 'Scan ${{ matrix.os }} / ${{ matrix.platform }} container'
+  sarif_category: 'grype-${{ matrix.os }}-${{ matrix.platform }}'
+.github/workflows/build_container.yml:
+  publish_tag_patterns:
+    - 'v*'
+  publish_build_job_name: 'Build OpenVox Server ${{ matrix.server_version }} (${{ matrix.os }}/${{ matrix.platform }})'
+  publish_build_arch: 'linux/${{ matrix.platform }}'
+  publish_tags:
+    - 'ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-${{ matrix.os }}-${{ matrix.platform }}'
+  publish_manifest_matrix_command: bash matrix.sh tag
+  publish_manifest_steps:
+    - name: Create ref-specific Ubuntu manifest
+      commands:
+        - >-
+          docker buildx imagetools create
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
+    - name: Create ref-specific Alpine manifest
+      commands:
+        - >-
+          docker buildx imagetools create
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-alpine
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-alpine
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-alpine
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-alpine
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
+    - name: Update floating Ubuntu tag
+      if: "github.ref == 'refs/heads/main'"
+      commands:
+        - >-
+          docker buildx imagetools create
+          -t ghcr.io/openvoxproject/openvoxserver:latest
+          -t docker.io/voxpupuli/openvoxserver:latest
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
+    - name: Update floating Alpine tag
+      if: "github.ref == 'refs/heads/main'"
+      commands:
+        - >-
+          docker buildx imagetools create
+          -t ghcr.io/openvoxproject/openvoxserver:latest-alpine
+          -t docker.io/voxpupuli/openvoxserver:latest-alpine
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
+  dockerhub_repository: voxpupuli/openvoxserver
