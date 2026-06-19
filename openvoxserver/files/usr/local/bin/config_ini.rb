@@ -3,7 +3,10 @@
 # Helper script using Puppet's own INI manipulator in place of `pupppet config`.
 # See /usr/local/share/openvox/config_lib.sh for the companion script.
 
-require 'puppet'
+module Puppet
+  class Settings
+  end
+end
 require 'puppet/settings/ini_file'
 
 command = ARGV.shift
