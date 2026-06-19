@@ -1,0 +1,16 @@
+---
+.github/workflows/ci.yml:
+  matrix_command: bash matrix.sh build
+  matrix_requires_yq: true
+  build_job_name: 'Build ${{ matrix.os }} / ${{ matrix.platform }} CI container'
+  build_runner: '${{ matrix.runner }}'
+  build_file: 'Containerfile.${{ matrix.os }}'
+  image_tag: 'ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}'
+  build_platforms: 'linux/${{ matrix.platform }}'
+  build_args:
+    - 'OPENVOX_RELEASE=${{ matrix.release }}'
+    - 'OPENVOXSERVER_VERSION=${{ matrix.server_version }}'
+    - 'OPENVOXDB_VERSION=${{ matrix.db_version }}'
+    - 'RUBYGEM_R10K=${{ matrix.rubygem_r10k }}'
+    - 'RUBYGEM_RUGGED=${{ matrix.rubygem_rugged }}'
+    - 'JDK_VERSION=${{ matrix.jdk_version }}'
