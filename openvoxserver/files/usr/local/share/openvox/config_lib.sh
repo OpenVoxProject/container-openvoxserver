@@ -26,8 +26,10 @@ config_get() {
 
 config_set() {
   /usr/local/bin/config_ini.rb set "$@"
+  rm -f "$OPENVOX_CONFIG_CACHE"
 }
 
 config_delete() {
   /usr/local/bin/config_ini.rb delete "$@"
+  rm -f "$OPENVOX_CONFIG_CACHE"
 }
