@@ -44,8 +44,8 @@ ARG RUBYGEM_R10K=5.0.3
 # renovate: datasource=rubygems depName=rugged
 ARG RUBYGEM_RUGGED=1.9.0
 
-ARG OPENVOX_USER_UID=1001
-ARG OPENVOX_USER_GID=1001
+ARG OPENVOX_USER_UID=999
+ARG OPENVOX_USER_GID=999
 
 # renovate: datasource=custom.voxpupuli-artifacts depName=openvox-server
 ARG OPENVOXSERVER_VERSION=8.14.0

@@ -17,6 +17,7 @@
     - [Permissions](#permissions)
       - [Rootless Podman](#rootless-podman)
       - [Docker](#docker)
+    - [UID/GID](#uidgid)
   - [How to deploy OpenVox/Puppet code](#how-to-deploy-openvoxpuppet-code)
     - [✅ Preferred way to deploy your code](#-preferred-way-to-deploy-your-code)
     - [🔥 Not recommended way, but often used, pattern from the non-container world](#-not-recommended-way-but-often-used-pattern-from-the-non-container-world)
@@ -206,6 +207,18 @@ Permissions are managed for you, and from there the volume can be migrated using
 #### Docker
 
 Docker always runs rootfull, and does not need permissions adjustments.
+
+### UID/GID
+
+The image creates the `puppet` user with UID 999 and a corresponding group with GID 999 by default.
+These IDs determine file ownership inside the image and can be changed at build time.
+
+The container is configured with `USER puppet:0`, so the server process uses the `puppet` user's UID and group 0 at runtime.
+Directories required by the server are group-owned by group 0 and grant the group the same permissions as the owner.
+This also supports platforms such as OpenShift that run containers with an arbitrary UID in group 0.
+
+The build arguments only affect newly built images. They cannot be set as environment variables when starting an existing image.
+When changing the default IDs, ensure that bind mounts and existing volumes have compatible ownership and permissions.
 
 ## How to deploy OpenVox/Puppet code
 

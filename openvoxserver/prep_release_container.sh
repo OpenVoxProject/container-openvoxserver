@@ -1,8 +1,19 @@
 #!/bin/bash
 
 set -e
+source /etc/os-release
 
-if command -v apk > /dev/null 2>&1; then
+if [ "$ID" = "alpine" ]; then
+  if [ "$OPENVOX_USER_GID" -eq 999 ]; then
+    OPENVOX_GROUP=ping
+  else
+    OPENVOX_GROUP=puppet
+  fi
+else
+  OPENVOX_GROUP=puppet
+fi
+
+if [ "$ID" = "alpine" ]; then
   apk update
   apk add --no-cache \
     alpine-sdk \
@@ -22,7 +33,7 @@ if command -v apk > /dev/null 2>&1; then
     ruby \
     ruby-dev \
     runuser
-elif command -v apt-get > /dev/null 2>&1; then
+elif [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ]; then
   apt-get update
   apt-get install -y --no-install-recommends \
     build-essential \
@@ -56,7 +67,7 @@ gem install --no-document rugged:${RUBYGEM_RUGGED} -- --with-ssh
 gem install --no-document racc:1.8.1
 gem install --no-document syslog:0.4.0
 
-if command -v apk > /dev/null 2>&1; then
+if [ "$ID" = "alpine" ]; then
   apk del --purge alpine-sdk
 else
   apt-get purge -y build-essential
@@ -67,13 +78,16 @@ fi
 
 # Create puppet user and group, and set permissions on necessary directories
 # Used for rootless execution of the container and to match permissions expected by Puppet Server
-if command -v addgroup > /dev/null 2>&1 && command -v apk > /dev/null 2>&1; then
-  addgroup -g "${OPENVOX_USER_GID}" puppet
-  adduser -G puppet -u "${OPENVOX_USER_UID}" -h /opt/puppetlabs/server/data/puppetserver -H -D -s /sbin/nologin puppet
+if [ "$ID" = "alpine" ]; then
+  if [ "$OPENVOX_USER_GID" != 999 ]; then
+    addgroup -g "${OPENVOX_USER_GID}" "${OPENVOX_GROUP}"
+  fi
+
+  adduser -G "${OPENVOX_GROUP}" -u "${OPENVOX_USER_UID}" -h /opt/puppetlabs/server/data/puppetserver -H -D -s /sbin/nologin puppet
 else
-  groupadd --gid "${OPENVOX_USER_GID}" puppet
+  groupadd --gid "${OPENVOX_USER_GID}" "${OPENVOX_GROUP}"
   useradd \
-    --gid puppet \
+    --gid "${OPENVOX_USER_GID}" \
     --home-dir /opt/puppetlabs/server/data/puppetserver \
     --no-create-home \
     --shell /usr/sbin/nologin \
@@ -81,12 +95,12 @@ else
     puppet
 fi
 
-chown -R puppet:puppet /etc/puppetlabs/code
-chown -R puppet:puppet /etc/puppetlabs/puppet/ssl
-chown -R puppet:puppet /etc/puppetlabs/puppetserver/ca
-chown -R puppet:puppet /opt/puppetlabs/server/data/puppetserver
-chown -R puppet:puppet /var/log/puppetlabs/puppetserver
-chown -R puppet:puppet /var/run/puppetlabs/puppetserver
+chown -R puppet:"${OPENVOX_GROUP}" /etc/puppetlabs/code
+chown -R puppet:"${OPENVOX_GROUP}" /etc/puppetlabs/puppet/ssl
+chown -R puppet:"${OPENVOX_GROUP}" /etc/puppetlabs/puppetserver/ca
+chown -R puppet:"${OPENVOX_GROUP}" /opt/puppetlabs/server/data/puppetserver
+chown -R puppet:"${OPENVOX_GROUP}" /var/log/puppetlabs/puppetserver
+chown -R puppet:"${OPENVOX_GROUP}" /var/run/puppetlabs/puppetserver
 
 chmod 0700 /opt/puppetlabs/server/data/puppetserver/jars
 chmod 0700 /opt/puppetlabs/server/data/puppetserver/yaml
