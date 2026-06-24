@@ -2,6 +2,8 @@
 
 set -e
 
+source /usr/local/share/openvox/config_lib.sh
+
 ca_running() {
   status=$(curl --silent --fail --insecure "https://${CA_HOSTNAME}:${CA_PORT:-8140}/status/v1/simple")
   test "$status" = "running"
@@ -10,16 +12,15 @@ ca_running() {
 if [[ "$CA_ENABLED" != "true" ]]; then
   # we are just an ordinary compiler
   echo "turning off CA"
-  cat > /etc/puppetlabs/puppetserver/services.d/ca.cfg <<EOF
+  cat >/etc/puppetlabs/puppetserver/services.d/ca.cfg <<EOF
 puppetlabs.services.ca.certificate-authority-disabled-service/certificate-authority-disabled-service
 puppetlabs.trapperkeeper.services.watcher.filesystem-watch-service/filesystem-watch-service
 EOF
 
-  ssl_cert=$(puppet config print hostcert)
-  ssl_key=$(puppet config print hostprivkey)
-  ssl_ca_cert=$(puppet config print localcacert)
-  ssl_crl_path=$(puppet config print hostcrl)
-
+  ssl_cert=$(config_get hostcert)
+  ssl_key=$(config_get hostprivkey)
+  ssl_ca_cert=$(config_get localcacert)
+  ssl_crl_path=$(config_get hostcrl)
 
   cd /etc/puppetlabs/puppetserver/conf.d/
   hocon -f webserver.conf set webserver.ssl-cert $ssl_cert
@@ -38,9 +39,7 @@ EOF
   fi
 else
   # we are the CA
-  puppet config set --section server ca_ttl "${CA_TTL}"
-  puppet config set --section server ca_server "${CA_HOSTNAME}"
-  puppet config set --section server ca_port "${CA_PORT}"
+  config_set server ca_ttl "${CA_TTL}" ca_server "${CA_HOSTNAME}" ca_port "${CA_PORT}"
   hocon -f /etc/puppetlabs/puppetserver/conf.d/ca.conf \
     set certificate-authority.allow-subject-alt-names "${CA_ALLOW_SUBJECT_ALT_NAMES}"
 
@@ -59,7 +58,7 @@ else
       exit 99
     fi
 
-    ca_cert=$(puppet config print cacert)
+    ca_cert=$(config_get cacert)
     if [[ -f "$ca_cert" ]]; then
       echo "CA already imported."
     else
@@ -69,31 +68,31 @@ else
         --private-key $INTERMEDIATE_CA_KEY
     fi
   else
-    new_cadir=$(puppet config print cadir)
-    ssl_dir=$(puppet config print ssldir)
+    new_cadir=$(config_get cadir)
+    ssl_dir=$(config_get ssldir)
 
     if [ ! -f "$new_cadir/ca_crt.pem" ] && [ ! -f "$ssl_dir/ca/ca_crt.pem" ]; then
-        # There is no existing CA
+      # There is no existing CA
 
-        # Append user-supplied DNS Alt Names
-        if [ -n "$DNS_ALT_NAMES" ]; then
-            current="$(puppet config print --section main dns_alt_names)"
-            # shell parameter expansion to remove trailing comma if there is one
-            updated="${DNS_ALT_NAMES%,}"
-            if [ -n "$current" ]; then updated="$current","$updated"; fi
-            puppet config set --section main dns_alt_names "$updated"
-        fi
+      # Append user-supplied DNS Alt Names
+      if [ -n "$DNS_ALT_NAMES" ]; then
+        current="$(config_get dns_alt_names)"
+        # shell parameter expansion to remove trailing comma if there is one
+        updated="${DNS_ALT_NAMES%,}"
+        if [ -n "$current" ]; then updated="$current","$updated"; fi
+        config_set main dns_alt_names "$updated"
+      fi
 
-        timestamp="$(date '+%Y-%m-%d %H:%M:%S %z')"
-        ca_name="Puppet CA generated on ${HOSTNAME} at $timestamp"
+      timestamp="$(date '+%Y-%m-%d %H:%M:%S %z')"
+      ca_name="Puppet CA generated on ${HOSTNAME} at $timestamp"
 
-        # See puppet.conf file for relevant settings
-        puppetserver ca setup \
-            --ca-name "$ca_name"
+      # See puppet.conf file for relevant settings
+      puppetserver ca setup \
+        --ca-name "$ca_name"
 
     elif [ ! -f "$new_cadir/ca_crt.pem" ] && [ -f "$ssl_dir/ca/ca_crt.pem" ]; then
-        # Legacy CA upgrade
-        puppetserver ca migrate
-        fi
+      # Legacy CA upgrade
+      puppetserver ca migrate
+    fi
   fi
 fi

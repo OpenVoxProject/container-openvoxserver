@@ -2,10 +2,12 @@
 
 set -e
 
+source /usr/local/share/openvox/config_lib.sh
+
 if [ -n "${OPENVOXSERVER_HOSTNAME}" ]; then
-  puppet config set server "$OPENVOXSERVER_HOSTNAME"
+  config_set main server "$OPENVOXSERVER_HOSTNAME"
 fi
 
 if [ -n "${CERTNAME}" ]; then
-  puppet config set certname "$CERTNAME"
+  config_set main certname "$CERTNAME"
 fi

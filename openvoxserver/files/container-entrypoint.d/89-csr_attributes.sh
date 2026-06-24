@@ -2,12 +2,14 @@
 
 set -e
 
+source /usr/local/share/openvox/config_lib.sh
+
 # determine script location
 readonly SCRIPT_FILENAME=$(readlink -f "${BASH_SOURCE[0]}")
 readonly SCRIPT_PATH=$(dirname "$SCRIPT_FILENAME")
-readonly CSR_PATH=$(puppet config print csr_attributes)
+readonly CSR_PATH=$(config_get csr_attributes)
 
 if [ -n "${CSR_ATTRIBUTES}" ]; then
-    echo "CSR Attributes: ${CSR_ATTRIBUTES}"
-    /opt/puppetlabs/puppet/bin/ruby "$SCRIPT_PATH/89-csr_attributes.rb" "$CSR_PATH"
+  echo "CSR Attributes: ${CSR_ATTRIBUTES}"
+  /opt/puppetlabs/puppet/bin/ruby "$SCRIPT_PATH/89-csr_attributes.rb" "$CSR_PATH"
 fi
