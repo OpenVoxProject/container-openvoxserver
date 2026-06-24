@@ -1,6 +1,8 @@
-#! /bin/sh
+#!/bin/bash
 
 set -e
+
+source /usr/local/share/openvox/config_lib.sh
 
 ### Print configuration for troubleshooting
 echo "System configuration values:"
@@ -8,7 +10,7 @@ echo "System configuration values:"
 echo "* HOSTNAME: '${HOSTNAME}'"
 echo "* hostname -f: '$(hostname -f)'"
 
-ssl_dir=$(puppet config print ssldir)
+ssl_dir=$(config_get ssldir)
 
 if [ -n "${CERTNAME}" ]; then
   echo "* CERTNAME: '${CERTNAME}'"

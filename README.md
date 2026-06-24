@@ -178,7 +178,7 @@ services:
 
 #### Rootless Podman
 
-When using rootless Podman, the OpenVox Server process starts as a virtual `root` and then drops privileges to the `puppet` user.
+When using rootless Podman, the OpenVox Server process runs directly as the non-root `puppet` user (UID 1001) with the root group (GID 0).
 This can lead to permission issues with bind mount volumes, which you may want to use for the OpenVox SSL and CA directories. For example:
 
 ```shell

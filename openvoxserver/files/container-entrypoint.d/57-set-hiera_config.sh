@@ -2,4 +2,6 @@
 
 set -e
 
-puppet config set --section server hiera_config $HIERACONFIG
+source /usr/local/share/openvox/config_lib.sh
+
+config_set server hiera_config $HIERACONFIG

@@ -82,8 +82,8 @@ else
 fi
 
 chown -R puppet:puppet /etc/puppetlabs/code
-chown -R puppet:puppet /etc/puppetlabs/puppet/ssl
-chown -R puppet:puppet /etc/puppetlabs/puppetserver/ca
+chown -R puppet:puppet /etc/puppetlabs/puppet
+chown -R puppet:puppet /etc/puppetlabs/puppetserver
 chown -R puppet:puppet /opt/puppetlabs/server/data/puppetserver
 chown -R puppet:puppet /var/log/puppetlabs/puppetserver
 chown -R puppet:puppet /var/run/puppetlabs/puppetserver
@@ -117,12 +117,11 @@ ln -sf /var/log/puppetlabs ${HOME}/.puppetlabs/var/log
 ln -sf /var/run/puppetlabs ${HOME}/.puppetlabs/var/run
 
 # mirror user permissions to group, set group to root, and set gid bit on dirs
-for d in /etc/puppetlabs /var/log/puppetlabs /var/run/puppetlabs /opt/puppetlabs/
-do
-  mkdir -p "$d";
-  chgrp -R 0 "$d";
-  chmod -R g=u "$d";
-  find "$d" -type d -exec chmod g+s {} +;
+for d in /etc/puppetlabs /var/log/puppetlabs /var/run/puppetlabs /opt/puppetlabs/ /run/openvox; do
+  mkdir -p "$d"
+  chgrp -R 0 "$d"
+  chmod -R g=u "$d"
+  find "$d" -type d -exec chmod g+s {} +
 done
 
 # the foreground starting script has this check before running the server:
