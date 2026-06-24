@@ -2,4 +2,6 @@
 
 set -e
 
-puppet config set --section server environmentpath $ENVIRONMENTPATH
+source /usr/local/share/openvox/config_lib.sh
+
+config_set server environmentpath $ENVIRONMENTPATH

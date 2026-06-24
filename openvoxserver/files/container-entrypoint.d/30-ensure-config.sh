@@ -2,9 +2,12 @@
 
 set -e
 
-puppet config set confdir /etc/puppetlabs/puppet
-puppet config set vardir /opt/puppetlabs/puppet/cache
-puppet config set logdir /var/log/puppetlabs/puppet
-puppet config set codedir /etc/puppetlabs/code
-puppet config set rundir /var/run/puppetlabs
-puppet config set manage_internal_file_permissions false
+source /usr/local/share/openvox/config_lib.sh
+
+config_set main \
+  confdir /etc/puppetlabs/puppet \
+  vardir /opt/puppetlabs/puppet/cache \
+  logdir /var/log/puppetlabs/puppet \
+  codedir /etc/puppetlabs/code \
+  rundir /var/run/puppetlabs \
+  manage_internal_file_permissions false

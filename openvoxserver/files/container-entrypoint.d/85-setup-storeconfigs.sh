@@ -1,26 +1,28 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
+source /usr/local/share/openvox/config_lib.sh
+
 if [ -n "$OPENVOX_STORECONFIGS_BACKEND" ]; then
-  puppet config set storeconfigs_backend $OPENVOX_STORECONFIGS_BACKEND --section server
+  config_set server storeconfigs_backend $OPENVOX_STORECONFIGS_BACKEND
 fi
 
 if [ -n "$OPENVOX_STORECONFIGS" ]; then
-  puppet config set storeconfigs $OPENVOX_STORECONFIGS --section server
+  config_set server storeconfigs $OPENVOX_STORECONFIGS
 fi
 
 if [ -n "$OPENVOX_REPORTS" ]; then
-  puppet config set reports $OPENVOX_REPORTS --section server
+  config_set server reports $OPENVOX_REPORTS
 fi
 
 # reset defaults if USE_OPENVOXDB is false, but don't overwrite custom settings
 if [ "$USE_OPENVOXDB" = 'false' ]; then
   if [ "$OPENVOX_REPORTS" = 'puppetdb' ]; then
-    puppet config set reports log --section server
+    config_set server reports log
   fi
 
   if [ "$OPENVOX_STORECONFIGS_BACKEND" = 'puppetdb' ]; then
-    puppet config set storeconfigs false --section server
+    config_set server storeconfigs false
   fi
 fi
