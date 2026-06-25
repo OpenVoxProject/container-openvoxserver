@@ -109,7 +109,7 @@ USER puppet:0
 # Create a CDS archive in a stage for faster class loading.
 FROM app AS cds
 RUN OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m -XX:ArchiveClassesAtExit=/opt/puppetlabs/server/apps/puppetserver/puppetserver.jsa" \
-    timeout 60 dumb-init /container-entrypoint.sh foreground || true
+    timeout --preserve-status 60 dumb-init /container-entrypoint.sh foreground || [ $? -eq 143 ]
 
 FROM app AS final
 COPY --from=cds /opt/puppetlabs/server/apps/puppetserver/puppetserver.jsa /opt/puppetlabs/server/apps/puppetserver/puppetserver.jsa
