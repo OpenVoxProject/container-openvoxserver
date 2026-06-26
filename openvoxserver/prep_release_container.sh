@@ -47,7 +47,18 @@ else
   exit 1
 fi
 
-gem install --no-document hiera-eyaml:${RUBYGEM_HIERA_EYAML}
+# Install gems into the system CRuby gem path. These back the tools that run
+# under the distro Ruby inside the container: the `puppet`/`facter` CLIs (used
+# by the entrypoint, e.g. `puppet config print`), the `puppetserver ca` CLI
+# (its cli/apps/ca app runs under the distro Ruby via /opt/puppetlabs/puppet/bin/ruby
+# and needs openvoxserver-ca plus its hocon dependency), and the `r10k`
+# convenience symlink created below. racc and syslog are stdlib gems dropped
+# from default Ruby 3.4+, installed here for the distro Ruby. rugged is a native
+# extension that cannot load on JRuby.
+#
+# NOTE: this path is NOT on puppetserver's JRuby gem-path. hiera-eyaml is needed
+# only by the server JVM (for eyaml Hiera lookups), so it is installed solely
+# into the JRuby gem-home further down, along with openvox. See #148.
 gem install --no-document hocon:1.4.0
 gem install --no-document openvox:${RUBYGEM_OPENVOX}
 gem install --no-document openvoxserver-ca:${RUBYGEM_OPENVOXSERVER_CA}
@@ -97,13 +108,34 @@ chmod 0770 /opt/puppetlabs/server/data/puppetserver
 find /etc/puppetlabs/puppet/ssl -type d -exec chmod 0770 {} \;
 
 mkdir -p /opt/puppetlabs/puppet/bin
-for executable in puppet facter ruby gem irb erb r10k eyaml
+for executable in puppet facter ruby gem irb erb r10k
 do
   ln -s "$(command -v "$executable")" "/opt/puppetlabs/puppet/bin/$executable"
 done
 
-# install puppet gem as library into jruby loadpath
+# Install the gems the puppetserver JVM loads at runtime into the JRuby
+# gem-home. The `gem install` calls above only populate the distro CRuby gem
+# path (e.g. /var/lib/gems/3.x), which is NOT on puppetserver's JRuby gem-path,
+# so any gem the server loads is invisible there. openvox provides puppet as a
+# server library, and hiera-eyaml is required for eyaml-encrypted Hiera lookups
+# during catalog compilation. The other gems above are CLI tools that run under
+# the distro Ruby (not the JVM), so they are not needed here. See #148.
 puppetserver gem install --no-document openvox:${RUBYGEM_OPENVOX}
+puppetserver gem install --no-document hiera-eyaml:${RUBYGEM_HIERA_EYAML}
+
+# Expose the `eyaml` CLI. hiera-eyaml lives only in the JRuby gem-home, and its
+# binstub there resolves the gem against the default (distro) gem-path, where it
+# is no longer installed, so it can't simply be symlinked. Wrap it to run under
+# the distro Ruby with GEM_PATH pointed at the JRuby gem-home; hiera-eyaml is a
+# pure-Ruby gem, so it loads fine there and we avoid JVM start-up. The CLI is
+# essentially never used inside the container, it is provided only for the
+# occasional manual eyaml encrypt/decrypt.
+cat > /opt/puppetlabs/puppet/bin/eyaml <<'SCRIPT'
+#!/bin/bash
+export GEM_PATH="/opt/puppetlabs/server/data/puppetserver/jruby-gems${GEM_PATH:+:$GEM_PATH}"
+exec ruby /opt/puppetlabs/server/data/puppetserver/jruby-gems/bin/eyaml "$@"
+SCRIPT
+chmod 0755 /opt/puppetlabs/puppet/bin/eyaml
 
 # use system/root paths instead of non-root paths to make permission management
 # and volume mounting simpler. for this we link the appropiate paths and explicitly
