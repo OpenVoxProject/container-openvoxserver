@@ -22,7 +22,7 @@ COPY openvoxserver/prep_build_container.sh /
 RUN /prep_build_container.sh
 
 ################################################################################
-FROM base AS final
+FROM base AS app
 
 # renovate: datasource=rubygems depName=hiera-eyaml
 ARG RUBYGEM_HIERA_EYAML=5.0.1
@@ -79,7 +79,7 @@ ENV AUTOSIGN=true \
     OPENVOXSERVER_GRAPHITE_HOST=exporter \
     OPENVOXSERVER_GRAPHITE_PORT=9109 \
     OPENVOXSERVER_HOSTNAME="" \
-    OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m" \
+    OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m -XX:SharedArchiveFile=/opt/puppetlabs/server/apps/puppetserver/puppetserver.jsa" \
     OPENVOXSERVER_MAX_ACTIVE_INSTANCES=1 \
     OPENVOXSERVER_MAX_REQUESTS_PER_INSTANCE=0 \
     OPENVOXSERVER_PORT=8140 \
@@ -105,6 +105,14 @@ COPY Containerfile.alpine /Containerfile
 RUN /prep_release_container.sh
 
 USER puppet:0
+
+# Create a CDS archive in a stage for faster class loading.
+FROM app AS cds
+RUN OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m -XX:ArchiveClassesAtExit=/opt/puppetlabs/server/apps/puppetserver/puppetserver.jsa -Xlog:cds=off" \
+    timeout --preserve-status 60 dumb-init /container-entrypoint.sh foreground || [ $? -eq 143 ]
+
+FROM app AS final
+COPY --from=cds /opt/puppetlabs/server/apps/puppetserver/puppetserver.jsa /opt/puppetlabs/server/apps/puppetserver/puppetserver.jsa
 
 # k8s uses livenessProbe, startupProbe, readinessProbe and ignores HEALTHCHECK
 HEALTHCHECK --interval=20s --timeout=15s --retries=12 --start-period=3m CMD ["/healthcheck.sh"]

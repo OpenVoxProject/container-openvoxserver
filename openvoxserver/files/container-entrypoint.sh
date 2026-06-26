@@ -87,17 +87,20 @@ post_execution_handler() {
 
 ## Sigterm Handler
 # shellcheck disable=SC2317 # function is called when the container receives a SIGTERM signal
+# We're forwarding the sigterm to the child JVM process (/usr/bin/java) instead of the
+# wrapper script (/opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground), else it
+# doesn't shut down gracefully.
 sigterm_handler() {
   echoerr "Catching SIGTERM"
   if [ $pid -ne 0 ]; then
-    echoerr "sigterm_handler for PID '${pid}' triggered"
+    echoerr "sigterm_handler triggered, shutting down service"
     # the above if statement is important because it ensures
     # that the application has already started. without it you
     # could attempt cleanup steps if the application failed to
     # start, causing errors.
     run_custom_handler sigterm-handler
-    kill -15 "$pid"
-    wait "$pid"
+    pkill -TERM -f puppet-server-release.jar
+    while pgrep -f puppet-server-release.jar > /dev/null; do sleep 1; done
     post_execution_handler
   fi
   exit 143; # 128 + 15 -- SIGTERM
