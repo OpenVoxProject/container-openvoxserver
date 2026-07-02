@@ -62,3 +62,10 @@ cd /puppetdb-${OPENVOXDB_VERSION}
 RUBY_LIB_DIR="/opt/puppetlabs/puppet/lib/ruby/vendor_ruby"
 install -d "$RUBY_LIB_DIR"
 cp -r puppet "$RUBY_LIB_DIR/"
+
+mkdir -p /opt/puppetlabs/puppet/vendor_modules
+cd /vendor_modules
+for module in augeas_core cron_core host_core mount_core scheduled_task selinux_core sshkeys_core yumrepo_core zfs_core zone_core; do
+  tar -x -z -f puppetlabs-$module.tar.gz
+  mv puppetlabs-$module-* /opt/puppetlabs/puppet/vendor_modules/$module
+done
