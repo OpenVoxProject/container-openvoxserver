@@ -18,6 +18,38 @@ ARG OPENVOXDB_VERSION=8.14.1
 ADD https://artifacts.voxpupuli.org/openvox-server/${OPENVOXSERVER_VERSION}/openvox-server-${OPENVOXSERVER_VERSION}.tar.gz /
 ADD https://artifacts.voxpupuli.org/openvoxdb/${OPENVOXDB_VERSION}/openvoxdb-${OPENVOXDB_VERSION}.tar.gz /
 
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-augeas_core
+ARG MODULE_AUGEAS_CORE=1.5.0
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-cron_core
+ARG MODULE_CRON_CORE=1.3.0
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-host_core
+ARG MODULE_HOST_CORE=1.3.0
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-mount_core
+ARG MODULE_MOUNT_CORE=1.3.0
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-scheduled_task
+ARG MODULE_SCHEDULED_TASK=3.2.0
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-selinux_core
+ARG MODULE_SELINUX_CORE=1.4.0
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-sshkeys_core
+ARG MODULE_SSHKEYS_CORE=2.5.0
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-yumrepo_core
+ARG MODULE_YUMREPO_CORE=2.1.0
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-zfs_core
+ARG MODULE_ZFS_CORE=1.6.1
+# renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-zone_core
+ARG MODULE_ZONE_CORE=1.2.0
+
+ADD https://github.com/OpenVoxProject/puppetlabs-augeas_core/archive/refs/tags/v${MODULE_AUGEAS_CORE}.tar.gz /vendor_modules/puppetlabs-augeas_core.tar.gz
+ADD https://github.com/OpenVoxProject/puppetlabs-cron_core/archive/refs/tags/v${MODULE_CRON_CORE}.tar.gz /vendor_modules/puppetlabs-cron_core.tar.gz
+ADD https://github.com/OpenVoxProject/puppetlabs-host_core/archive/refs/tags/v${MODULE_HOST_CORE}.tar.gz /vendor_modules/puppetlabs-host_core.tar.gz
+ADD https://github.com/OpenVoxProject/puppetlabs-mount_core/archive/refs/tags/v${MODULE_MOUNT_CORE}.tar.gz /vendor_modules/puppetlabs-mount_core.tar.gz
+ADD https://github.com/OpenVoxProject/puppetlabs-scheduled_task/archive/refs/tags/v${MODULE_SCHEDULED_TASK}.tar.gz /vendor_modules/puppetlabs-scheduled_task.tar.gz
+ADD https://github.com/OpenVoxProject/puppetlabs-selinux_core/archive/refs/tags/v${MODULE_SELINUX_CORE}.tar.gz /vendor_modules/puppetlabs-selinux_core.tar.gz
+ADD https://github.com/OpenVoxProject/puppetlabs-sshkeys_core/archive/refs/tags/v${MODULE_SSHKEYS_CORE}.tar.gz /vendor_modules/puppetlabs-sshkeys_core.tar.gz
+ADD https://github.com/OpenVoxProject/puppetlabs-yumrepo_core/archive/refs/tags/v${MODULE_YUMREPO_CORE}.tar.gz /vendor_modules/puppetlabs-yumrepo_core.tar.gz
+ADD https://github.com/OpenVoxProject/puppetlabs-zfs_core/archive/refs/tags/v${MODULE_ZFS_CORE}.tar.gz /vendor_modules/puppetlabs-zfs_core.tar.gz
+ADD https://github.com/OpenVoxProject/puppetlabs-zone_core/archive/refs/tags/v${MODULE_ZONE_CORE}.tar.gz /vendor_modules/puppetlabs-zone_core.tar.gz
+
 COPY openvoxserver/prep_build_container.sh /
 RUN /prep_build_container.sh
 
