@@ -19,6 +19,17 @@
     },
     {
       "customType": "regex",
+      "datasourceTemplate": "github-tags",
+      "extractVersionTemplate": "^v(?<version>\\d+\\.\\d+\\.\\d+)$",
+      "managerFilePatterns": [
+        "/(^|/)Containerfile\\.(?:alpine|ubuntu)$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=github-tags\\s+depName=(?<depName>OpenVoxProject/puppetlabs-[a-z0-9_]+)\\s*\\n\\s*ARG\\s+MODULE_[A-Z0-9_]+=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ]
+    },
+    {
+      "customType": "regex",
       "managerFilePatterns": [
         "/(^|/)Containerfile\\.(?:alpine|ubuntu)$/",
         "/(^|/)build_versions\\.yaml$/"
