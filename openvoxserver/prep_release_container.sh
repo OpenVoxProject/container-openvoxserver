@@ -123,6 +123,16 @@ done
 puppetserver gem install --no-document openvox:${RUBYGEM_OPENVOX}
 puppetserver gem install --no-document hiera-eyaml:${RUBYGEM_HIERA_EYAML}
 
+# Colocate the puppetdb termini with the openvox gem lib so the puppetdb_query
+# function resolves during compilation. The termini in vendor_ruby (on
+# ruby-load-path) cover the require-loaded terminus and report processor, but
+# Puppet 4 functions load via the Pops system loader, rooted at puppet's own lib
+# rather than ruby-load-path. Since #141 gem-installs openvox instead of using
+# the OS packages (whose openvoxdb-termini colocated everything in vendor_ruby),
+# that root is the gem lib, so puppetdb_query would otherwise be unknown.
+cp -r /opt/puppetlabs/puppet/lib/ruby/vendor_ruby/puppet \
+  "/opt/puppetlabs/server/data/puppetserver/jruby-gems/gems/openvox-${RUBYGEM_OPENVOX}/lib/"
+
 # Expose the `eyaml` CLI. hiera-eyaml lives only in the JRuby gem-home, and its
 # binstub there resolves the gem against the default (distro) gem-path, where it
 # is no longer installed, so it can't simply be symlinked. Wrap it to run under
