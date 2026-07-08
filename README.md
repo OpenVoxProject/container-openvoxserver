@@ -9,6 +9,7 @@
 - [OpenVox Server container](#openvox-server-container)
   - [Informations](#informations)
     - [End of Life for OpenVox Server 7](#end-of-life-for-openvox-server-7)
+    - [Migration](#migration)
   - [Note about environment caching](#note-about-environment-caching)
   - [Version schema](#version-schema)
   - [Configuration](#configuration)
@@ -54,6 +55,10 @@ For compose file see: [CRAFTY](https://github.com/voxpupuli/crafty/tree/main/ope
 ⚠️ On February 28, 2025, OpenVox/Puppet 7 entered its end-of-life phase.
 Consequently, no new OpenVox Server 7 releases will be build.
 Existing versions will be retained for continued access.
+
+### Migration
+
+Before updating to a newer version of your container, you should check the [migration document](MIGRATION.md)
 
 ## Note about environment caching
 
