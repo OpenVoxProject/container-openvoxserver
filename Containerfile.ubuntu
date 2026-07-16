@@ -36,7 +36,7 @@ ARG MODULE_HOST_CORE=1.3.0
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-mount_core
 ARG MODULE_MOUNT_CORE=1.3.0
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-scheduled_task
-ARG MODULE_SCHEDULED_TASK=3.2.0
+ARG MODULE_SCHEDULED_TASK=4.0.3
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-selinux_core
 ARG MODULE_SELINUX_CORE=1.4.0
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-sshkeys_core
