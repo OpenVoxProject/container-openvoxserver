@@ -2,7 +2,7 @@
 
 set -e
 
-if command -v apk > /dev/null 2>&1; then
+if command -v apk >/dev/null 2>&1; then
   apk update
   apk add --no-cache \
     alpine-sdk \
@@ -22,7 +22,7 @@ if command -v apk > /dev/null 2>&1; then
     ruby \
     ruby-dev \
     runuser
-elif command -v apt-get > /dev/null 2>&1; then
+elif command -v apt-get >/dev/null 2>&1; then
   apt-get update
   apt-get install -y --no-install-recommends \
     build-essential \
@@ -67,7 +67,7 @@ gem install --no-document rugged:${RUBYGEM_RUGGED} -- --with-ssh
 gem install --no-document racc:1.8.1
 gem install --no-document syslog:0.4.0
 
-if command -v apk > /dev/null 2>&1; then
+if command -v apk >/dev/null 2>&1; then
   apk del --purge alpine-sdk
 else
   apt-get purge -y build-essential
@@ -78,7 +78,7 @@ fi
 
 # Create puppet user and group, and set permissions on necessary directories
 # Used for rootless execution of the container and to match permissions expected by Puppet Server
-if command -v addgroup > /dev/null 2>&1 && command -v apk > /dev/null 2>&1; then
+if command -v addgroup >/dev/null 2>&1 && command -v apk >/dev/null 2>&1; then
   addgroup -g "${OPENVOX_USER_GID}" puppet
   adduser -G puppet -u "${OPENVOX_USER_UID}" -h /opt/puppetlabs/server/data/puppetserver -H -D -s /sbin/nologin puppet
 else
@@ -108,9 +108,12 @@ chmod 0770 /opt/puppetlabs/server/data/puppetserver
 find /etc/puppetlabs/puppet/ssl -type d -exec chmod 0770 {} \;
 
 mkdir -p /opt/puppetlabs/puppet/bin
-for executable in puppet facter ruby gem irb erb r10k
-do
+for executable in puppet facter ruby gem irb erb r10k; do
   ln -s "$(command -v "$executable")" "/opt/puppetlabs/puppet/bin/$executable"
+done
+
+for executable in puppet facter r10k; do
+  ln -s "../puppet/bin/$executable" "/opt/puppetlabs/bin/$executable"
 done
 
 # Install the gems the puppetserver JVM loads at runtime into the JRuby
@@ -140,7 +143,7 @@ cp -r /opt/puppetlabs/puppet/lib/ruby/vendor_ruby/puppet \
 # pure-Ruby gem, so it loads fine there and we avoid JVM start-up. The CLI is
 # essentially never used inside the container, it is provided only for the
 # occasional manual eyaml encrypt/decrypt.
-cat > /opt/puppetlabs/puppet/bin/eyaml <<'SCRIPT'
+cat >/opt/puppetlabs/puppet/bin/eyaml <<'SCRIPT'
 #!/bin/bash
 export GEM_PATH="/opt/puppetlabs/server/data/puppetserver/jruby-gems${GEM_PATH:+:$GEM_PATH}"
 exec ruby /opt/puppetlabs/server/data/puppetserver/jruby-gems/bin/eyaml "$@"
