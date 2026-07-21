@@ -114,6 +114,7 @@ The following environment variables are supported:
 | Name                                        | Usage / Default |
 |---------------------------------------------| --------------- |
 | __AUTOSIGN__                                | Whether or not to enable autosigning on the openvoxserver instance. Valid values are `true`, `false`, and `/path/to/autosign.conf`.<br><br>Defaults to `true`. |
+| __CA_ALLOW_DUPLICATE_CERTS__                | Whether or not the CA accepts a new CSR for a certname that already has a signed certificate. Valid values are `true` and `false`. Does nothing unless `CA_ENABLED=true`.<br><br>Defaults to `false` |
 | __CA_ALLOW_SUBJECT_ALT_NAMES__              | Whether or not SSL certificates containing Subject Alternative Names should be signed by the CA. Does nothing unless `CA_ENABLED=true`.<br><br>Defaults to `false` |
 | __CA_ENABLED__                              | Whether or not this openvoxserver instance has a running CA (Certificate Authority)<br><br>Defaults to `true` |
 | __CA_HOSTNAME__                             | The DNS hostname for the openvoxserver running the CA. Does nothing unless `CA_ENABLED=false`<br><br>Defaults to `puppet` |
