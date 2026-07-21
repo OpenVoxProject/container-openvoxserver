@@ -114,6 +114,7 @@ The following environment variables are supported:
 | Name                                        | Usage / Default |
 |---------------------------------------------| --------------- |
 | __AUTOSIGN__                                | Whether or not to enable autosigning on the openvoxserver instance. Valid values are `true`, `false`, and `/path/to/autosign.conf`.<br><br>Defaults to `true`. |
+| __CA_ALLOW_DUPLICATE_CERTS__                | Whether or not the CA accepts a new CSR for a certname that already has a signed certificate. Valid values are `true` and `false`. Does nothing unless `CA_ENABLED=true`.<br><br>Defaults to `false` |
 | __CA_ALLOW_SUBJECT_ALT_NAMES__              | Whether or not SSL certificates containing Subject Alternative Names should be signed by the CA. Does nothing unless `CA_ENABLED=true`.<br><br>Defaults to `false` |
 | __CA_ENABLED__                              | Whether or not this openvoxserver instance has a running CA (Certificate Authority)<br><br>Defaults to `true` |
 | __CA_HOSTNAME__                             | The DNS hostname for the openvoxserver running the CA. Does nothing unless `CA_ENABLED=false`<br><br>Defaults to `puppet` |
@@ -123,6 +124,7 @@ The following environment variables are supported:
 | __CSR_ATTRIBUTES__                          | Provide a JSON string of the csr_attributes.yaml content. e.g. `CSR_ATTRIBUTES='{"custom_attributes": { "challengePassword": "foobar" }, "extension_requests": { "pp_project": "foo" } }'`<br><br> Defaults to empty JSON object `{}`<br> Please note that within a compose file, you must provide all environment variables as Hash and not as Array!<br> environment:<br> `CSR_ATTRIBUTES: '{"extension_request": {...}}'` |
 | __DNS_ALT_NAMES__                           | Additional DNS names to add to the servers SSL certificate<br>__Note__ only effective on initial run when certificates are generated |
 | __ENVIRONMENTPATH__                         | Set an environmentpath<br><br> Defaults to `/etc/puppetlabs/code/environments` |
+| __EXTERNAL_NODES__                          | Command (script path plus any arguments) of an external node classifier (ENC) executed to classify nodes - sets `external_nodes` in puppet.conf and sets `node_terminus` to `exec`. |
 | __HIERACONFIG__                             | Set a hiera_config entry in puppet.conf file<br><br> Defaults to `$confdir/hiera.yaml` |
 | __INTERMEDIATE_CA__                         | Allows to import an existing intermediate CA. Needs `INTERMEDIATE_CA_BUNDLE`, `INTERMEDIATE_CA_CHAIN` and `INTERMEDIATE_CA_KEY`. See [Puppet Intermediat CA](https://www.puppet.com/docs/puppet/latest/server/intermediate_ca.html) |
 | __INTERMEDIATE_CA_BUNDLE__                  | File path and name to the complete CA bundle (signing CA + Intermediate CA) |
