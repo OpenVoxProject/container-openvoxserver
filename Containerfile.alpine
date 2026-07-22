@@ -11,7 +11,7 @@ RUN apk update && apk upgrade \
 FROM base AS build
 
 # renovate: datasource=custom.voxpupuli-artifacts depName=openvox-server
-ARG OPENVOXSERVER_VERSION=8.14.1
+ARG OPENVOXSERVER_VERSION=8.15.1
 # renovate: datasource=custom.voxpupuli-artifacts depName=openvoxdb
 ARG OPENVOXDB_VERSION=8.14.1
 
@@ -71,7 +71,7 @@ ARG OPENVOX_USER_UID=64604
 ARG OPENVOX_USER_GID=64604
 
 # renovate: datasource=custom.voxpupuli-artifacts depName=openvox-server
-ARG OPENVOXSERVER_VERSION=8.14.1
+ARG OPENVOXSERVER_VERSION=8.15.1
 
 LABEL org.label-schema.maintainer="Voxpupuli Team <voxpupuli@groups.io>" \
       org.label-schema.vendor="OpenVoxProject" \
