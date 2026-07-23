@@ -1,10 +1,14 @@
 ---
-name: Build and publish a 🛢️ container
+# Managed by modulesync - DO NOT EDIT
+# https://voxpupuli.org/docs/updating-files-managed-with-modulesync/
 
+name: 📦 Build and Publish
+
+# yamllint disable-line rule:truthy
 on:
   push:
     branches:
-      - 'main'
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
@@ -14,41 +18,52 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read # minimal required permissions to clone repo
+  contents: read
 
 jobs:
   setup-matrix:
+    name: Set up build matrix
     runs-on: ubuntu-latest
     outputs:
-      build_matrix: ${{ steps.set-build-matrix.outputs.build_matrix }}
-      tag_matrix: ${{ steps.set-tag-matrix.outputs.tag_matrix }}
+      build-matrix: ${{ steps.build-matrix.outputs.build-matrix }}
+      manifest-matrix: ${{ steps.manifest-matrix.outputs.manifest-matrix }}
     steps:
-      - name: Source checkout
-        uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: 'Setup yq'
-        uses: dcarbone/install-yq-action@v1.3.1
+      - name: Install yq
+        uses: dcarbone/install-yq-action@4075b4dca348d74bd83f2bf82d30f25d7c54539b # v1.3.1
 
-      - id: set-build-matrix
-        run: echo "build_matrix=$(bash matrix.sh build)" >> $GITHUB_OUTPUT
+      - name: Generate build matrix
+        id: build-matrix
+        run: |
+          matrix_json=$(bash matrix.sh build)
+          echo "build-matrix=$matrix_json" >> "$GITHUB_OUTPUT"
 
-      - id: set-tag-matrix
-        run: echo "tag_matrix=$(bash matrix.sh tag)" >> $GITHUB_OUTPUT
+      - name: Generate manifest matrix
+        id: manifest-matrix
+        run: |
+          matrix_json=$(bash matrix.sh tag)
+          echo "manifest-matrix=$matrix_json" >> "$GITHUB_OUTPUT"
 
   build-and-push-container:
+    name: Build OpenVox Server ${{ matrix.server_version }} (${{ matrix.os }}/${{ matrix.platform }})
     runs-on: ${{ matrix.runner }}
+    needs:
+      - setup-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup-matrix.outputs.build-matrix) }}
     permissions:
       contents: read
       packages: write
-    needs: setup-matrix
-    strategy:
-      matrix: ${{ fromJson(needs.setup-matrix.outputs.build_matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Build ${{ matrix.os }} / ${{ matrix.platform }} container
-        uses: voxpupuli/gha-build-and-publish-a-container@v2
+      - name: Build and publish container
+        id: build
+        uses: voxpupuli/gha-build-and-publish-a-container@f1680271a3fd34267c1401c760a15f45a9cf34ca # v2.0.0
         with:
           registry_password: ${{ secrets.GITHUB_TOKEN }}
           build_args: |
@@ -61,92 +76,65 @@ jobs:
           build_arch: linux/${{ matrix.platform }}
           build_context: .
           buildfile: Containerfile.${{ matrix.os }}
-          # tag will look like: ghcr.io/openvoxproject/openvoxserver:8-<sha>-ubuntu-amd64
-          tags: ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-${{ matrix.os }}-${{ matrix.platform }}
+          tags: |
+            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-${{ matrix.os }}-${{ matrix.platform }}
 
-  create-multi-arch-manifests:
+  create-multiarch-manifests:
+    name: Create multi-architecture manifests
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     needs:
       - setup-matrix
       - build-and-push-container
     strategy:
-      matrix: ${{ fromJson(needs.setup-matrix.outputs.tag_matrix) }}
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup-matrix.outputs.manifest-matrix) }}
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - name: Log in to the ghcr.io registry
-        uses: docker/login-action@v4
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to the docker.io registry
-        uses: docker/login-action@v4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: docker.io
           username: voxpupulibot
           password: ${{ secrets.DOCKERHUB_BOT_ADMIN_TOKEN }}
 
-      - name: Create ref-specific multi-arch manifests
+      - name: Create ref-specific Ubuntu manifest
         run: |
-          # tag will look like: ghcr.io/openvoxproject/openvoxserver:8.13.0-v1.2.3
-          # tag will look like: ghcr.io/openvoxproject/openvoxserver:8.13.0-main
-          # tag will look like: ghcr.io/openvoxproject/openvoxserver:8.13.0
-          # tag will look like: ghcr.io/openvoxproject/openvoxserver:8
-          docker buildx imagetools create \
-            -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }} \
-            -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }} \
-            -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }} \
-            -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }} \
-            -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }} \
-            -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }} \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }} -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }} -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }} -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }} -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }} -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }} ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
 
-          # tag will look like: ghcr.io/openvoxproject/openvoxserver:8.13.0-v1.2.3-alpine
-          # tag will look like: ghcr.io/openvoxproject/openvoxserver:8.13.0-main-alpine
-          # tag will look like: ghcr.io/openvoxproject/openvoxserver:8.13.0-alpine
-          # tag will look like: ghcr.io/openvoxproject/openvoxserver:8-alpine
-          docker buildx imagetools create \
-            -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine \
-            -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-alpine \
-            -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-alpine \
-            -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine \
-            -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-alpine \
-            -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-alpine \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
+      - name: Create ref-specific Alpine manifest
+        run: |
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-alpine -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-alpine ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
 
-      - name: Update floating multi-arch tags
+      - name: Update floating Ubuntu tag
         if: github.ref == 'refs/heads/main'
         run: |
-          # Ubuntu is the default variant and therefore has no OS suffix.
-          docker buildx imagetools create \
-            -t ghcr.io/openvoxproject/openvoxserver:latest \
-            -t docker.io/voxpupuli/openvoxserver:latest \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:latest -t docker.io/voxpupuli/openvoxserver:latest ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
 
-          docker buildx imagetools create \
-            -t ghcr.io/openvoxproject/openvoxserver:latest-alpine \
-            -t docker.io/voxpupuli/openvoxserver:latest-alpine \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64 \
-            ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
+      - name: Update floating Alpine tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:latest-alpine -t docker.io/voxpupuli/openvoxserver:latest-alpine ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
 
   update-dockerhub-description:
+    name: Update Docker Hub description
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     needs:
-      - create-multi-arch-manifests
+      - create-multiarch-manifests
     steps:
-      - name: Source checkout
-        uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Update Docker Hub Description
-        uses: peter-evans/dockerhub-description@v5
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
         with:
           username: voxpupulibot
           password: ${{ secrets.DOCKERHUB_BOT_ADMIN_TOKEN }}

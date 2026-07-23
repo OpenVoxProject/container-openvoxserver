@@ -1,0 +1,68 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  // Apply shared labels so dependency updates are easy to filter in GitHub.
+  "addLabels": [
+    "dependencies",
+    "renovate"
+  ],
+  // Keep routine dependency updates low-touch for repos with CODEOWNERS.
+  "assigneesFromCodeOwners": true,
+  "customManagers": [
+    {
+      // Track Ruby gem versions declared in build_versions.yaml.
+      "customType": "regex",
+      "datasourceTemplate": "rubygems",
+      "managerFilePatterns": [
+        "/build_versions.yaml/"
+      ],
+      "matchStrings": [
+        "rubygem_(?<depName>[a-z0-9_-]+):\\s+'(?<currentValue>\\d+\\.\\d+\\.\\d+)'"
+      ]
+    },
+    {
+      // Track gem versions set as RUBYGEM_* defaults in Containerfiles.
+      "customType": "regex",
+      "datasourceTemplate": "rubygems",
+      "versioningTemplate": "ruby",
+      "managerFilePatterns": [
+        "/Containerfile/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*depName=(?<depName>[a-zA-Z0-9_-]+)\\s+datasource=rubygems\\s*\\n\\s*ENV\\s+RUBYGEM_[A-Z0-9_-]+=\\$\\{RUBYGEM_[A-Z0-9_-]+:-?(?<currentValue>[^}\\n]+)\\}"
+      ]
+    },
+    {
+      // Track OpenVox gem versions in matrix definitions.
+      "customType": "regex",
+      "datasourceTemplate": "rubygems",
+      "versioningTemplate": "ruby",
+      "managerFilePatterns": [
+        "/build_platforms.yaml/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*depName=(?<depName>[a-zA-Z0-9_-]+)\\s+datasource=rubygems\\s*\\n\\s*(?<key>openvox_version):\\s*'(?<currentValue>[^']+)'"
+      ]
+    }
+  ],
+  // Use Renovate's normal defaults, but open PRs immediately instead of waiting.
+  "extends": [
+    "config:recommended",
+    ":prImmediately"
+  ],
+  // Mark vulnerability alerts separately from normal dependency updates.
+  "vulnerabilityAlerts": {
+    "addLabels": [
+      "security"
+    ],
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      // Do not require dashboard approval before creating updates.
+      "dependencyDashboardApproval": false,
+      "matchPackageNames": [
+        "/.*/"
+      ]
+    }
+  ]
+}
