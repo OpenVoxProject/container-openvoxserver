@@ -4,7 +4,7 @@ include:
     # renovate: datasource=custom.voxpupuli-artifacts depName=openvox-server
     server_version: "8.15.1"
     # renovate: datasource=custom.voxpupuli-artifacts depName=openvoxdb
-    db_version: "8.14.1"
+    db_version: "8.15.0"
     # renovate: datasource=rubygems depName=r10k
     rubygem_r10k: "5.0.3"
     # renovate: datasource=rubygems depName=rugged
