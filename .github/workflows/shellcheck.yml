@@ -22,20 +22,20 @@ jobs:
       actions: read
     steps:
     - name: Repository checkout
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         # Differential ShellCheck requires full git history
         fetch-depth: 0
 
     - id: ShellCheck
       name: Differential ShellCheck
-      uses: redhat-plumbers-in-action/differential-shellcheck@v5
+      uses: redhat-plumbers-in-action/differential-shellcheck@d965e66ec0b3b2f821f75c8eff9b12442d9a7d1e # v5.5.6
       with:
         scan-directory: '.'
 
     - if: always()
       name: Upload artifact with ShellCheck defects in SARIF format
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: Differential ShellCheck SARIF
         path: ${{ steps.ShellCheck.outputs.sarif }}
