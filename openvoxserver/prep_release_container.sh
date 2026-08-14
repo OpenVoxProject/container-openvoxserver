@@ -76,28 +76,14 @@ else
   rm -rf /var/lib/apt/lists/*
 fi
 
-# Create puppet user and group, and set permissions on necessary directories
-# Used for rootless execution of the container and to match permissions expected by Puppet Server
-if command -v addgroup >/dev/null 2>&1 && command -v apk >/dev/null 2>&1; then
-  addgroup -g "${OPENVOX_USER_GID}" puppet
-  adduser -G puppet -u "${OPENVOX_USER_UID}" -h /opt/puppetlabs/server/data/puppetserver -H -D -s /sbin/nologin puppet
-else
-  groupadd --gid "${OPENVOX_USER_GID}" puppet
-  useradd \
-    --gid puppet \
-    --home-dir /opt/puppetlabs/server/data/puppetserver \
-    --no-create-home \
-    --shell /usr/sbin/nologin \
-    --uid "${OPENVOX_USER_UID}" \
-    puppet
-fi
-
-chown -R puppet:puppet /etc/puppetlabs/code
-chown -R puppet:puppet /etc/puppetlabs/puppet
-chown -R puppet:puppet /etc/puppetlabs/puppetserver
-chown -R puppet:puppet /opt/puppetlabs/server/data/puppetserver
-chown -R puppet:puppet /var/log/puppetlabs/puppetserver
-chown -R puppet:puppet /var/run/puppetlabs/puppetserver
+# The container runs as UID 64604 by default, but any UID works. Everything the
+# server needs to write is root-owned with group 0 mirroring the owner permissions
+chown -R 0:0 /etc/puppetlabs/code
+chown -R 0:0 /etc/puppetlabs/puppet
+chown -R 0:0 /etc/puppetlabs/puppetserver
+chown -R 0:0 /opt/puppetlabs/server/data/puppetserver
+chown -R 0:0 /var/log/puppetlabs/puppetserver
+chown -R 0:0 /var/run/puppetlabs/puppetserver
 
 chmod 0700 /opt/puppetlabs/server/data/puppetserver/jars
 chmod 0700 /opt/puppetlabs/server/data/puppetserver/yaml
@@ -168,7 +154,6 @@ for d in /etc/puppetlabs /var/log/puppetlabs /var/run/puppetlabs /opt/puppetlabs
   chmod -R g=u "$d"
   find "$d" -type d -exec chmod g+s {} +
 done
-chown puppet /run/openvox
 
 # the foreground starting script has this check before running the server:
 # [ "$EUID" = "$(id -u ${USER})" ]
