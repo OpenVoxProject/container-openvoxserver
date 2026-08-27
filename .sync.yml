@@ -13,6 +13,43 @@
     - 'RUBYGEM_R10K=${{ matrix.rubygem_r10k }}'
     - 'RUBYGEM_RUGGED=${{ matrix.rubygem_rugged }}'
     - 'JDK_VERSION=${{ matrix.jdk_version }}'
+.github/renovate.jsonc:
+  renovate_custom_managers:
+    - customType: regex
+      datasourceTemplate: rubygems
+      managerFilePatterns:
+        - /(^|/)Containerfile\.(?:alpine|ubuntu)$/
+        - /(^|/)build_versions\.yaml$/
+      matchStrings:
+        - >-
+          rubygem_(?<depName>[a-z0-9_-]+):\s*"(?<currentValue>\d+\.\d+\.\d+)"
+        - >-
+          #\s*renovate:\s*datasource=rubygems\s+depName=(?<depName>[a-z0-9_-]+)\s*\n\s*ARG\s+RUBYGEM_[A-Z0-9_]+=(?<currentValue>\d+\.\d+\.\d+)
+    - customType: regex
+      datasourceTemplate: github-tags
+      extractVersionTemplate: '^v(?<version>\d+\.\d+\.\d+)$'
+      managerFilePatterns:
+        - /(^|/)Containerfile\.(?:alpine|ubuntu)$/
+      matchStrings:
+        - >-
+          #\s*renovate:\s*datasource=github-tags\s+depName=(?<depName>OpenVoxProject/puppetlabs-[a-z0-9_]+)\s*\n\s*ARG\s+MODULE_[A-Z0-9_]+=(?<currentValue>\d+\.\d+\.\d+)
+    - customType: regex
+      managerFilePatterns:
+        - /(^|/)Containerfile\.(?:alpine|ubuntu)$/
+        - /(^|/)build_versions\.yaml$/
+      matchStrings:
+        - >-
+          #\s*renovate:\s*datasource=(?<datasource>custom\.voxpupuli-artifacts)\s+depName=(?<depName>openvox(?:-server|db))\s*\n\s*(?:ARG\s+OPENVOX(?:SERVER|DB)_VERSION=|(?:server|db)_version:\s*")(?<currentValue>\d+\.\d+\.\d+)
+      versioningTemplate: semver
+  renovate_custom_datasources:
+    voxpupuli-artifacts:
+      defaultRegistryUrlTemplate: 'https://artifacts.voxpupuli.org/{{packageName}}/'
+      format: html
+  renovate_package_rules:
+    - matchDatasources:
+        - custom.voxpupuli-artifacts
+      allowedVersions: '/^8\./'
+      extractVersion: '^(?<version>\d+\.\d+\.\d+)/$'
 .github/workflows/ci.yml:
   build_job_name: 'Build ${{ matrix.os }} / ${{ matrix.platform }} CI container'
 .github/workflows/security_scanning.yml:
