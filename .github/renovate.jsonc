@@ -1,9 +1,15 @@
 {
+  // Managed by modulesync - DO NOT EDIT
+  // https://voxpupuli.org/docs/updating-files-managed-with-modulesync/
+  //
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "addLabels": [ "dependencies", "renovate" ],
+  // Apply shared labels so dependency updates are easy to filter in GitHub.
+  "addLabels": [
+    "dependencies",
+    "renovate"
+  ],
+  // Keep routine dependency updates low-touch for repos with CODEOWNERS.
   "assigneesFromCodeOwners": true,
-  "automerge": true,
-  "automergeType": "pr",
   "customManagers": [
     {
       "customType": "regex",
@@ -46,20 +52,39 @@
       "format": "html"
     }
   },
-  "extends": [ "config:recommended", ":prImmediately" ],
+  // Use Renovate's normal defaults, but open PRs immediately instead of waiting.
+  "extends": [
+    "config:recommended",
+    ":prImmediately"
+  ],
+  // Mark vulnerability alerts separately from normal dependency updates.
   "vulnerabilityAlerts": {
-    "addLabels": [ "security" ],
+    "addLabels": [
+      "security"
+    ],
     "enabled": true
   },
   "packageRules": [
     {
-      "matchDatasources": ["custom.voxpupuli-artifacts"],
+      // GitHub Actions are updated centrally in the ModuleSync configuration repository.
+      "enabled": false,
+      "matchManagers": [
+        "github-actions"
+      ]
+    },
+    {
+      "matchDatasources": [
+        "custom.voxpupuli-artifacts"
+      ],
       "allowedVersions": "/^8\\./",
       "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)/$"
     },
     {
-      "matchPackagePatterns": [".*"],
-      "dependencyDashboardApproval": false
+      // Do not require dashboard approval before creating updates.
+      "dependencyDashboardApproval": false,
+      "matchPackageNames": [
+        "/.*/"
+      ]
     }
   ]
 }
