@@ -70,7 +70,7 @@ ARG RUBYGEM_HIERA_EYAML=5.0.1
 # renovate: datasource=rubygems depName=openvox
 ARG RUBYGEM_OPENVOX=8.28.1
 # renovate: datasource=rubygems depName=openvoxserver-ca
-ARG RUBYGEM_OPENVOXSERVER_CA=3.2.0
+ARG RUBYGEM_OPENVOXSERVER_CA=3.3.0
 # renovate: datasource=rubygems depName=r10k
 ARG RUBYGEM_R10K=5.0.3
 # renovate: datasource=rubygems depName=rugged
