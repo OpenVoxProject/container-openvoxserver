@@ -68,7 +68,7 @@ FROM base AS app
 # renovate: datasource=rubygems depName=hiera-eyaml
 ARG RUBYGEM_HIERA_EYAML=5.0.1
 # renovate: datasource=rubygems depName=openvox
-ARG RUBYGEM_OPENVOX=8.27.0
+ARG RUBYGEM_OPENVOX=8.28.1
 # renovate: datasource=rubygems depName=openvoxserver-ca
 ARG RUBYGEM_OPENVOXSERVER_CA=3.2.0
 # renovate: datasource=rubygems depName=r10k
