@@ -15,35 +15,43 @@
       "customType": "regex",
       "datasourceTemplate": "rubygems",
       "managerFilePatterns": [
-        "/build_versions.yaml/"
+        "/(^|/)Containerfile\\.(?:alpine|ubuntu)$/",
+        "/(^|/)build_versions\\.yaml$/"
       ],
       "matchStrings": [
-        "rubygem_(?<depName>[a-z0-9_-]+):\\s+'(?<currentValue>\\d+\\.\\d+\\.\\d+)'"
+        "rubygem_(?<depName>[a-z0-9_-]+):\\s*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"",
+        "#\\s*renovate:\\s*datasource=rubygems\\s+depName=(?<depName>[a-z0-9_-]+)\\s*\\n\\s*ARG\\s+RUBYGEM_[A-Z0-9_]+=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ]
     },
     {
       "customType": "regex",
-      "datasourceTemplate": "rubygems",
-      "versioningTemplate": "ruby",
+      "datasourceTemplate": "github-tags",
+      "extractVersionTemplate": "^v(?<version>\\d+\\.\\d+\\.\\d+)$",
       "managerFilePatterns": [
-        "/Containerfile/"
+        "/(^|/)Containerfile\\.(?:alpine|ubuntu)$/"
       ],
       "matchStrings": [
-        "#\\s*renovate:\\s*depName=(?<depName>[a-zA-Z0-9_-]+)\\s+datasource=rubygems\\s*\\n\\s*ENV\\s+RUBYGEM_[A-Z0-9_-]+=\\$\\{RUBYGEM_[A-Z0-9_-]+:-?(?<currentValue>[^}\\n]+)\\}"
+        "#\\s*renovate:\\s*datasource=github-tags\\s+depName=(?<depName>OpenVoxProject/puppetlabs-[a-z0-9_]+)\\s*\\n\\s*ARG\\s+MODULE_[A-Z0-9_]+=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ]
     },
     {
       "customType": "regex",
-      "datasourceTemplate": "rubygems",
-      "versioningTemplate": "ruby",
       "managerFilePatterns": [
-        "/build_platforms.yaml/"
+        "/(^|/)Containerfile\\.(?:alpine|ubuntu)$/",
+        "/(^|/)build_versions\\.yaml$/"
       ],
       "matchStrings": [
-        "#\\s*renovate:\\s*depName=(?<depName>[a-zA-Z0-9_-]+)\\s+datasource=rubygems\\s*\\n\\s*(?<key>openvox_version):\\s*'(?<currentValue>[^']+)'"
-      ]
+        "#\\s*renovate:\\s*datasource=(?<datasource>custom\\.voxpupuli-artifacts)\\s+depName=(?<depName>openvox(?:-server|db))\\s*\\n\\s*(?:ARG\\s+OPENVOX(?:SERVER|DB)_VERSION=|(?:server|db)_version:\\s*\")(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "versioningTemplate": "semver"
     }
   ],
+  "customDatasources": {
+    "voxpupuli-artifacts": {
+      "defaultRegistryUrlTemplate": "https://artifacts.voxpupuli.org/{{packageName}}/",
+      "format": "html"
+    }
+  },
   // Use Renovate's normal defaults, but open PRs immediately instead of waiting.
   "extends": [
     "config:recommended",
@@ -63,6 +71,13 @@
       "matchManagers": [
         "github-actions"
       ]
+    },
+    {
+      "matchDatasources": [
+        "custom.voxpupuli-artifacts"
+      ],
+      "allowedVersions": "/^8\\./",
+      "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)/$"
     },
     {
       // Do not require dashboard approval before creating updates.

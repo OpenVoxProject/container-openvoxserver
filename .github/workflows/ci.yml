@@ -69,6 +69,12 @@ jobs:
             RUBYGEM_RUGGED=${{ matrix.rubygem_rugged }}
             JDK_VERSION=${{ matrix.jdk_version }}
 
+      - name: Test image
+        run: |
+          docker run --rm -v "$PWD/tests:/tests:ro,Z" --entrypoint puppet ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }} catalog compile --manifest /tests/simple_catalog.pp --render-as json > catalog.json
+          grep -q '"type":"Host"' catalog.json
+          grep -q '"type":"Cron"' catalog.json
+
   tests:
     name: Test suite
     if: always()
