@@ -52,6 +52,13 @@
       extractVersion: '^(?<version>\d+\.\d+\.\d+)/$'
 .github/workflows/ci.yml:
   build_job_name: 'Build ${{ matrix.os }} / ${{ matrix.platform }} CI container'
+  test_commands:
+    - >-
+      docker run --rm -v "$PWD/tests:/tests:ro,Z" --entrypoint puppet
+      ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}
+      catalog compile --manifest /tests/simple_catalog.pp --render-as json > catalog.json
+    - grep -q '"type":"Host"' catalog.json
+    - grep -q '"type":"Cron"' catalog.json
 .github/workflows/security_scanning.yml:
   scan_job_name: 'Scan ${{ matrix.os }} / ${{ matrix.platform }} container'
   sarif_category: 'grype-${{ matrix.os }}-${{ matrix.platform }}'
