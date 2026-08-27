@@ -14,7 +14,7 @@
       ],
       "matchStrings": [
         "rubygem_(?<depName>[a-z0-9_-]+):\\s*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"",
-        "#\\s*renovate:\\s*depName=(?<depName>[a-z0-9_-]+)\\s+datasource=rubygems\\s*\\n\\s*ARG\\s+RUBYGEM_[A-Z0-9_]+=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+        "#\\s*renovate:\\s*datasource=rubygems\\s+depName=(?<depName>[a-z0-9_-]+)\\s*\\n\\s*ARG\\s+RUBYGEM_[A-Z0-9_]+=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ]
     },
     {
