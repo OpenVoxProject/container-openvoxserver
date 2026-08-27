@@ -8,5 +8,5 @@ include:
     # renovate: datasource=rubygems depName=r10k
     rubygem_r10k: "5.0.3"
     # renovate: datasource=rubygems depName=rugged
-    rubygem_rugged: "1.9.0"
+    rubygem_rugged: "1.9.6"
     jdk_version: "21"
