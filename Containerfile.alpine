@@ -35,7 +35,7 @@ ARG MODULE_SSHKEYS_CORE=2.5.1
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-yumrepo_core
 ARG MODULE_YUMREPO_CORE=2.1.0
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-zfs_core
-ARG MODULE_ZFS_CORE=1.6.1
+ARG MODULE_ZFS_CORE=2.0.1
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-zone_core
 ARG MODULE_ZONE_CORE=1.2.0
 
