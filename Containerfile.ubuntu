@@ -73,8 +73,12 @@ ARG RUBYGEM_OPENVOX=8.28.1
 ARG RUBYGEM_OPENVOXSERVER_CA=3.3.0
 # renovate: datasource=rubygems depName=r10k
 ARG RUBYGEM_R10K=5.0.3
+# Rugged Version is not used on Ubuntu, system version is used instead.
+# It is kept here for consistency with the other Dockerfile.
+# it is kept also for the build process.
+# TODO: remove gems from the build process.
 # renovate: datasource=rubygems depName=rugged
-ARG RUBYGEM_RUGGED=1.9.0
+ARG RUBYGEM_RUGGED=1.9.6
 
 ARG OPENVOX_USER_UID=64604
 ARG OPENVOX_USER_GID=64604
