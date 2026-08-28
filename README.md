@@ -1,6 +1,6 @@
 # OpenVox Server container
 
-[![CI](https://github.com/openvoxproject/container-openvoxserver/actions/workflows/ci.yaml/badge.svg)](https://github.com/openvoxproject/container-openvoxserver/actions/workflows/ci.yaml)
+[![CI](https://github.com/openvoxproject/container-openvoxserver/actions/workflows/ci.yml/badge.svg)](https://github.com/openvoxproject/container-openvoxserver/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/openvoxproject/container-openvoxserver.svg)](https://github.com/openvoxproject/container-openvoxserver/blob/main/LICENSE)
 [![Sponsored by betadots GmbH](https://img.shields.io/badge/Sponsored%20by-betadots%20GmbH-blue.svg)](https://www.betadots.de)
 
@@ -21,6 +21,7 @@
   - [How to deploy OpenVox/Puppet code](#how-to-deploy-openvoxpuppet-code)
     - [✅ Preferred way to deploy your code](#-preferred-way-to-deploy-your-code)
     - [🔥 Not recommended way, but often used, pattern from the non-container world](#-not-recommended-way-but-often-used-pattern-from-the-non-container-world)
+  - [Differences between the Ubuntu and Alpine containers](#differences-between-the-ubuntu-and-alpine-containers)
   - [How to Release the container](#how-to-release-the-container)
   - [How to contribute](#how-to-contribute)
 
@@ -258,6 +259,14 @@ Then you can run the following command to deploy your code.
 ```shell
 podman exec openvox r10k deploy environment -mv
 ```
+
+## Differences between the Ubuntu and Alpine containers
+
+| Topic | Ubuntu variant | Alpine variant |
+| --- | --- | --- |
+| Base | Ubuntu 26.04 | Alpine Linux 3.24 |
+| C library | glibc | musl, with `gcompat` installed for limited glibc compatibility |
+| `rugged` | Uses Ubuntu's `ruby-rugged` package because the rubygems version needs a newer `libgit2` | Builds the configured `rugged` gem during the image build with SSH support |
 
 ## How to Release the container
 

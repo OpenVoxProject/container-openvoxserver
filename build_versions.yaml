@@ -5,8 +5,9 @@ include:
     server_version: "8.15.2"
     # renovate: datasource=custom.voxpupuli-artifacts depName=openvoxdb
     db_version: "8.15.0"
+    # TODO: remove rubgems, they should be managed by the Containerfiles.
     # renovate: datasource=rubygems depName=r10k
     rubygem_r10k: "5.0.3"
     # renovate: datasource=rubygems depName=rugged
-    rubygem_rugged: "1.9.0"
+    rubygem_rugged: "1.9.6"
     jdk_version: "21"
