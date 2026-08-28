@@ -46,7 +46,7 @@ ARG MODULE_YUMREPO_CORE=2.1.0
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-zfs_core
 ARG MODULE_ZFS_CORE=1.6.1
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-zone_core
-ARG MODULE_ZONE_CORE=1.2.0
+ARG MODULE_ZONE_CORE=2.0.2
 
 ADD https://github.com/OpenVoxProject/puppetlabs-augeas_core/archive/refs/tags/v${MODULE_AUGEAS_CORE}.tar.gz /vendor_modules/puppetlabs-augeas_core.tar.gz
 ADD https://github.com/OpenVoxProject/puppetlabs-cron_core/archive/refs/tags/v${MODULE_CRON_CORE}.tar.gz /vendor_modules/puppetlabs-cron_core.tar.gz
