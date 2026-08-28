@@ -28,7 +28,7 @@ ADD https://artifacts.voxpupuli.org/openvox-server/${OPENVOXSERVER_VERSION}/open
 ADD https://artifacts.voxpupuli.org/openvoxdb/${OPENVOXDB_VERSION}/openvoxdb-${OPENVOXDB_VERSION}.tar.gz /
 
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-augeas_core
-ARG MODULE_AUGEAS_CORE=1.5.0
+ARG MODULE_AUGEAS_CORE=2.0.1
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-cron_core
 ARG MODULE_CRON_CORE=1.3.0
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-host_core
