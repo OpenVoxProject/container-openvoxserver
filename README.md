@@ -184,16 +184,20 @@ services:
 
 #### Rootless Podman
 
-When using rootless Podman, the OpenVox Server process runs directly as the non-root `puppet` user (UID 64604) with the root group (GID 0).
-This can lead to permission issues with bind mount volumes, which you may want to use for the OpenVox SSL and CA directories. For example:
+The container runs with the root group (GID 0) and works under any UID. Access to mounted volumes is granted through group 0 only, the UID of the files does not matter. Prepare bind mounts once using:
+
+```shell
+chgrp -R 0 <dir> && chmod -R g+rwX <dir>
+```
+
+For example for the OpenVox SSL and CA directories:
 
 ```shell
 -v ./openvoxserver-ssl:/etc/puppetlabs/puppet/ssl
 -v ./openvoxserver-ca:/etc/puppetlabs/puppetserver/ca
 ```
 
-By default the container will attempt to correct permissions. For a large number of files it may spend a long time at "Adjusting mounted CA directory ownership". This is normal.
-If this still runs into permissions issues please check selinux and related security layers. You can relabel the host directory using the `:Z` flag:
+If you still run into permission issues please check selinux and related security layers. You can relabel the host directory using the `:Z` flag:
 
 ```shell
 -v ./openvoxserver-ca:/etc/puppetlabs/puppetserver/ca:Z
