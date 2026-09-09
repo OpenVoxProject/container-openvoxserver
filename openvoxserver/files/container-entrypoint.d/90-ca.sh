@@ -40,6 +40,16 @@ EOF
 else
   # we are the CA
   config_set server ca_ttl "${CA_TTL}" ca_server "${CA_HOSTNAME}" ca_port "${CA_PORT}"
+  ca_allow_duplicate_certs="${CA_ALLOW_DUPLICATE_CERTS:-false}"
+  case "${ca_allow_duplicate_certs}" in
+    true|false)
+      config_set server allow_duplicate_certs "${ca_allow_duplicate_certs}"
+      ;;
+    *)
+      echo "Error: CA_ALLOW_DUPLICATE_CERTS must be true or false"
+      exit 99
+      ;;
+  esac
   hocon -f /etc/puppetlabs/puppetserver/conf.d/ca.conf \
     set certificate-authority.allow-subject-alt-names "${CA_ALLOW_SUBJECT_ALT_NAMES}"
 
