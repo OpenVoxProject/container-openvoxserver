@@ -70,6 +70,7 @@ jobs:
             OPENVOX_RELEASE=${{ matrix.release }}
             OPENVOXSERVER_VERSION=${{ matrix.server_version }}
             OPENVOXDB_VERSION=${{ matrix.db_version }}
+            RUBYGEM_OPENVOX=${{ matrix.rubygem_openvox }}
             RUBYGEM_R10K=${{ matrix.rubygem_r10k }}
             RUBYGEM_RUGGED=${{ matrix.rubygem_rugged }}
             JDK_VERSION=${{ matrix.jdk_version }}
@@ -115,12 +116,12 @@ jobs:
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-alpine -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-alpine ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
 
       - name: Update floating Ubuntu tag
-        if: github.ref == 'refs/heads/main'
+        if: ${{ github.ref == 'refs/heads/main' && matrix.release=='9' }}
         run: |
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:latest -t docker.io/voxpupuli/openvoxserver:latest ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
 
       - name: Update floating Alpine tag
-        if: github.ref == 'refs/heads/main'
+        if: ${{ github.ref == 'refs/heads/main' && matrix.release=='9' }}
         run: |
           docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:latest-alpine -t docker.io/voxpupuli/openvoxserver:latest-alpine ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
 
