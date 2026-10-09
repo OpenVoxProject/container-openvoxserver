@@ -10,6 +10,7 @@
     - 'OPENVOX_RELEASE=${{ matrix.release }}'
     - 'OPENVOXSERVER_VERSION=${{ matrix.server_version }}'
     - 'OPENVOXDB_VERSION=${{ matrix.db_version }}'
+    - 'RUBYGEM_OPENVOX=${{ matrix.rubygem_openvox }}'
     - 'RUBYGEM_R10K=${{ matrix.rubygem_r10k }}'
     - 'RUBYGEM_RUGGED=${{ matrix.rubygem_rugged }}'
     - 'JDK_VERSION=${{ matrix.jdk_version }}'
@@ -51,7 +52,7 @@
       allowedVersions: '/^8\./'
       extractVersion: '^(?<version>\d+\.\d+\.\d+)/$'
 .github/workflows/ci.yml:
-  build_job_name: 'Build ${{ matrix.os }} / ${{ matrix.platform }} CI container'
+  build_job_name: 'Build OpenVox ${{ matrix.release }} ${{ matrix.os }} / ${{ matrix.platform }} CI container'
   test_commands:
     - >-
       docker run --rm -v "$PWD/tests:/tests:ro,Z" --entrypoint puppet
@@ -60,7 +61,7 @@
     - grep -q '"type":"Host"' catalog.json
     - grep -q '"type":"Cron"' catalog.json
 .github/workflows/security_scanning.yml:
-  scan_job_name: 'Scan ${{ matrix.os }} / ${{ matrix.platform }} container'
+  scan_job_name: 'Scan OpenVox ${{ matrix.release }} ${{ matrix.os }} / ${{ matrix.platform }} container'
   sarif_category: 'grype-${{ matrix.os }}-${{ matrix.platform }}'
 .github/workflows/build_container.yml:
   publish_tag_patterns:
@@ -96,7 +97,7 @@
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
     - name: Update floating Ubuntu tag
-      if: "github.ref == 'refs/heads/main'"
+      if: "${{ github.ref == 'refs/heads/main' && matrix.release=='9' }}"
       commands:
         - >-
           docker buildx imagetools create
@@ -105,7 +106,7 @@
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
     - name: Update floating Alpine tag
-      if: "github.ref == 'refs/heads/main'"
+      if: "${{ github.ref == 'refs/heads/main' && matrix.release=='9' }}"
       commands:
         - >-
           docker buildx imagetools create

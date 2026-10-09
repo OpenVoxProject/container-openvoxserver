@@ -50,7 +50,8 @@ install ext/config/services.d/ca.cfg               "/etc/puppetlabs/puppetserver
 
 install ext/system-config/services.d/bootstrap.cfg "/opt/puppetlabs/server/apps/puppetserver/config/services.d/bootstrap.cfg" -m 0644
 install puppet-server-release.jar                  "/opt/puppetlabs/server/apps/puppetserver" -m 0644
-install ext/ezbake-functions.sh                    "/opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh" -m 0755
+# Not present in OpenVox 9
+[ -f ext/ezbake-functions.sh ] && install ext/ezbake-functions.sh  "/opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh" -m 0755
 
 ln -s "../apps/puppetserver/bin/puppetserver" "/opt/puppetlabs/server/bin/puppetserver"
 ln -s "../server/apps/puppetserver/bin/puppetserver" "/opt/puppetlabs/bin/puppetserver"
