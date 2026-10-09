@@ -23,7 +23,7 @@ ARG MODULE_AUGEAS_CORE=2.0.1
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-cron_core
 ARG MODULE_CRON_CORE=2.0.3
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-host_core
-ARG MODULE_HOST_CORE=2.0.1
+ARG MODULE_HOST_CORE=2.1.0
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-mount_core
 ARG MODULE_MOUNT_CORE=2.0.1
 # renovate: datasource=github-tags depName=OpenVoxProject/puppetlabs-scheduled_task
