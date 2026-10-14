@@ -18,7 +18,7 @@
     - customType: regex
       datasourceTemplate: rubygems
       managerFilePatterns:
-        - /(^|/)Containerfile\.(?:alpine|ubuntu)$/
+        - /(^|/)Containerfile\.(?:alpine|ubuntu|altlinux)$/
         - /(^|/)build_versions\.yaml$/
       matchStrings:
         - >-
@@ -29,13 +29,13 @@
       datasourceTemplate: github-tags
       extractVersionTemplate: '^v(?<version>\d+\.\d+\.\d+)$'
       managerFilePatterns:
-        - /(^|/)Containerfile\.(?:alpine|ubuntu)$/
+        - /(^|/)Containerfile\.(?:alpine|ubuntu|altlinux)$/
       matchStrings:
         - >-
           #\s*renovate:\s*datasource=github-tags\s+depName=(?<depName>OpenVoxProject/puppetlabs-[a-z0-9_]+)\s*\n\s*ARG\s+MODULE_[A-Z0-9_]+=(?<currentValue>\d+\.\d+\.\d+)
     - customType: regex
       managerFilePatterns:
-        - /(^|/)Containerfile\.(?:alpine|ubuntu)$/
+        - /(^|/)Containerfile\.(?:alpine|ubuntu|altlinux)$/
         - /(^|/)build_versions\.yaml$/
       matchStrings:
         - >-
@@ -95,6 +95,18 @@
           -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-alpine
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
+    - name: Create ref-specific Alt-linux manifest
+      commands:
+        - >-
+          docker buildx imagetools create
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-altlinux
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-altlinux
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-altlinux
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-altlinux
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-altlinux
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-altlinux
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-altlinux-arm64
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-altlinux-amd64
     - name: Update floating Ubuntu tag
       if: "github.ref == 'refs/heads/main'"
       commands:
@@ -113,4 +125,13 @@
           -t docker.io/voxpupuli/openvoxserver:latest-alpine
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
+    - name: Update floating Alt-linux tag
+      if: "github.ref == 'refs/heads/main'"
+      commands:
+        - >-
+          docker buildx imagetools create
+          -t ghcr.io/openvoxproject/openvoxserver:latest-altlinux
+          -t docker.io/voxpupuli/openvoxserver:latest-altlinux
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-altlinux-arm64
+          ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-altlinux-amd64
   dockerhub_repository: voxpupuli/openvoxserver

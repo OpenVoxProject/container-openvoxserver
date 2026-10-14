@@ -1,4 +1,4 @@
-FROM alt:sisyphus AS base
+FROM registry.altlinux.org/sisyphus/alt:latest AS base
 
 # due to rare updates of alt images in global repo need to update packages
 # alsough we clear caches

@@ -21,7 +21,7 @@
   - [How to deploy OpenVox/Puppet code](#how-to-deploy-openvoxpuppet-code)
     - [✅ Preferred way to deploy your code](#-preferred-way-to-deploy-your-code)
     - [🔥 Not recommended way, but often used, pattern from the non-container world](#-not-recommended-way-but-often-used-pattern-from-the-non-container-world)
-  - [Differences between the Ubuntu and Alpine containers](#differences-between-the-ubuntu-and-alpine-containers)
+  - [Differences between the Ubuntu Alpine and Alt-linux containers](#differences-between-the-ubuntu-alpine-and-alt-linux-containers)
   - [How to Release the container](#how-to-release-the-container)
   - [How to contribute](#how-to-contribute)
 
@@ -82,6 +82,7 @@ Another option is to disable the environment caching by setting the `OPENVOXSERV
 Images are published to `ghcr.io/openvoxproject/openvoxserver` and `docker.io/voxpupuli/openvoxserver`.
 Ubuntu is the default image variant and therefore has no operating system suffix.
 Alpine images use the `-alpine` suffix.
+Alt-linux images uses `-altlinux` suffix. Needed for users in some regions.
 
 | Tag | Example | Description |
 | --- | --- | --- |
@@ -260,13 +261,15 @@ Then you can run the following command to deploy your code.
 podman exec openvox r10k deploy environment -mv
 ```
 
-## Differences between the Ubuntu and Alpine containers
+## Differences between the Ubuntu Alpine and Alt-linux containers
 
-| Topic | Ubuntu variant | Alpine variant |
+| Topic | Ubuntu variant | Alpine variant | Alt-linux variant |
 | --- | --- | --- |
-| Base | Ubuntu 26.04 | Alpine Linux 3.24 |
-| C library | glibc | musl, with `gcompat` installed for limited glibc compatibility |
-| `rugged` | Uses Ubuntu's `ruby-rugged` package because the rubygems version needs a newer `libgit2` | Builds the configured `rugged` gem during the image build with SSH support |
+| Base | Ubuntu 26.04 | Alpine Linux 3.24 | Alt-linux sisyphus |
+| C library | glibc | musl, with `gcompat` installed for limited glibc compatibility | glibc |
+| `rugged` | Uses Ubuntu's `ruby-rugged` package because the rubygems version needs a newer `libgit2` | Builds the configured `rugged` gem during the image build with SSH support | Alt-linux `rubby-rugged` package |
+| `hocon` | gem v1.4.0 | gem v1.4.0 | distribution `hokon` gem packege in case of errors in JAVA_OPTS parsing by gem  |
+| other gems packages | - | - | gem-executable-hooks gem-rake-compiler gem-rake  |
 
 ## How to Release the container
 
