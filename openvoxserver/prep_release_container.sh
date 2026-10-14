@@ -1,8 +1,46 @@
 #!/bin/bash
 
 set -e
+source /etc/os-release || :
 
-if command -v apk >/dev/null 2>&1; then
+if [[ "$ID" == "altlinux" ]]; then
+  # if build is based on alt-linux
+  apt-get update
+  apt-get install -y \
+    build-essential \
+    ca-certificates \
+    cmake \
+    coreutils \
+    curl \
+    catatonit \
+    git \
+    jitterentropy-devel \
+    libssh2-devel \
+    libzstd-devel \
+    ebtables \
+    setup \
+    glibc-core \
+    openssh-clients \
+    openssl \
+    pkg-config \
+    ruby \
+    ruby-devel \
+    util-linux \
+    gem-rugged \
+    executable-hooks-uninstaller \
+    gem-executable-hooks \
+    benchmark-driver \
+    gem-rake-compiler \
+    gem-rake \
+    hocon
+
+    # link analog for dumb-init for compatibility
+    ln -s /usr/bin/catatonit /usr/bin/dumb-init
+    
+    # ruby package do not add its binary to path
+    export PATH=$PATH:/usr/lib/ruby/bin
+
+elif command -v apk >/dev/null 2>&1; then
   apk update
   apk add --no-cache \
     alpine-sdk \
@@ -21,7 +59,8 @@ if command -v apk >/dev/null 2>&1; then
     ruby-pkg-config \
     ruby \
     ruby-dev \
-    runuser
+    runuser   
+
 elif command -v apt-get >/dev/null 2>&1; then
   apt-get update
   apt-get install -y --no-install-recommends \
@@ -63,17 +102,27 @@ fi
 # NOTE: this path is NOT on puppetserver's JRuby gem-path. hiera-eyaml is needed
 # only by the server JVM (for eyaml Hiera lookups), so it is installed solely
 # into the JRuby gem-home further down, along with openvox. See #148.
-gem install --no-document hocon:1.4.0
+
+#gem install --no-document hocon:1.4.0
+#hocon in alt-linux installed by package - gem could not start properly
 gem install --no-document openvox:${RUBYGEM_OPENVOX}
 gem install --no-document openvoxserver-ca:${RUBYGEM_OPENVOXSERVER_CA}
 gem install --no-document r10k:${RUBYGEM_R10K}
 gem install --no-document racc:1.8.1
 gem install --no-document syslog:0.4.0
 
-if command -v apk >/dev/null 2>&1; then
+if [[ "$ID" == "altlinux" ]]; then
+  apt-get remove -y build-essential
+  apt-get autoremove -y
+  apt-get clean
+  rm -rf /var/cache/apt/* /var/lib/apt/*
+  mkdir -p /var/lib/apt/lists/partial /var/cache/apt/archives/partial
+elif command -v apk >/dev/null 2>&1; then
+  gem install --no-document hocon:1.4.0
   gem install --no-document rugged:${RUBYGEM_RUGGED} -- --with-ssh
   apk del --purge alpine-sdk
 else
+  gem install --no-document hocon:1.4.0
   apt-get purge -y build-essential
   apt-get autoremove -y
   apt-get clean
@@ -113,6 +162,7 @@ find /etc/puppetlabs/puppet/ssl -type d -exec chmod 0770 {} \;
 
 mkdir -p /opt/puppetlabs/puppet/bin
 for executable in puppet facter ruby gem irb erb r10k; do
+  #find / -name "$executable"
   ln -s "$(command -v "$executable")" "/opt/puppetlabs/puppet/bin/$executable"
 done
 
