@@ -42,6 +42,10 @@ elif command -v apt-get >/dev/null 2>&1; then
     ruby \
     ruby-dev \
     util-linux
+
+  # Ubuntu lacks newer libgit2 versions and so we cannot install latest rugged from rubygems.
+  # Instead, we install the system package which is built against the system libgit2.
+  apt-get install -y --no-install-recommends ruby-rugged
 else
   echo "Unsupported package manager" >&2
   exit 1
@@ -63,11 +67,11 @@ gem install --no-document hocon:1.4.0
 gem install --no-document openvox:${RUBYGEM_OPENVOX}
 gem install --no-document openvoxserver-ca:${RUBYGEM_OPENVOXSERVER_CA}
 gem install --no-document r10k:${RUBYGEM_R10K}
-gem install --no-document rugged:${RUBYGEM_RUGGED} -- --with-ssh
 gem install --no-document racc:1.8.1
 gem install --no-document syslog:0.4.0
 
 if command -v apk >/dev/null 2>&1; then
+  gem install --no-document rugged:${RUBYGEM_RUGGED} -- --with-ssh
   apk del --purge alpine-sdk
 else
   apt-get purge -y build-essential
