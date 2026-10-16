@@ -7,7 +7,7 @@ include:
     db_version: "8.17.0"
     # TODO: remove rubgems, they should be managed by the Containerfiles.
     # renovate: datasource=rubygems depName=openvox
-    rubygem_openvox: "8.29.0"
+    rubygem_openvox: "8.31.0"
     # renovate: datasource=rubygems depName=r10k
     rubygem_r10k: "5.0.3"
     # renovate: datasource=rubygems depName=rugged
