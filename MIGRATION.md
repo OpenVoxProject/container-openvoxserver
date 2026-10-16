@@ -1,11 +1,16 @@
 # Migrations
 
-## V8.12.0 -> V8.13.0
+## Coming from a fixed UID release
 
-UID is changed from 1001 on alpine and 999 on ubuntu to 64604.
-If you already deployed the containers with mounted volumes, you HAVE to change the ownership of these volumes and the files underneath.
+The container runs with **group 0** and works under **any UID**.
+File access is granted exclusively through group 0, and the UID of files on mounted volumes does not matter.
+There is no `puppet` service account in the image anymore.
+
+For existing volumes, run once:
 
 ```bash
-chown -R 64604:0 /path/to/ca_mountpoint
-chown -R 64604:0 /path/to/ssl_mountpoint
+chgrp -R 0 [PATH TO THE VOLUME]
+chmod -R g+rwX [PATH TO THE VOLUME]
 ```
+
+On Kubernetes/OpenShift using `fsGroup: 0` in the pod securityContext can be used to achieve the same.
