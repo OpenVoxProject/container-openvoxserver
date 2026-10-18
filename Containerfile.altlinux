@@ -143,8 +143,13 @@ USER puppet:0
 
 # Create a CDS archive in a stage for faster class loading.
 FROM app AS cds
-RUN JDK_DIR=$(find /usr/lib/jvm/ -name "java-$JDK_VERSION-openjdk*" | head -n 1) \
-    OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m -XX:+UseCompactObjectHeaders -XX:SharedArchiveFile=${JDK_DIR}/lib/server/classes_coh.jsa -XX:ArchiveClassesAtExit=/opt/puppetlabs/server/apps/puppetserver/puppetserver.jsa -Xlog:cds" \
+RUN JDK_DIR=$(find /usr/lib/jvm/ -name "java-$JDK_VERSION-openjdk*" | head -n 1)  && \
+    OPENVOXSERVER_JAVA_ARGS="-Xms1024m -Xmx1024m  -XX:ArchiveClassesAtExit=/opt/puppetlabs/server/apps/puppetserver/puppetserver.jsa -Xlog:cds" && \
+    if [ $JDK_VERSION -ge 25 ]; then \
+        OPENVOXSERVER_JAVA_ARGS="$OPENVOXSERVER_JAVA_ARGS -XX:+UseCompactObjectHeaders -XX:SharedArchiveFile=${JDK_DIR}/lib/server/classes_coh.jsa"; \
+    else \
+        OPENVOXSERVER_JAVA_ARGS="$OPENVOXSERVER_JAVA_ARGS -XX:-UseCompressedOops -XX:SharedArchiveFile=${JDK_DIR}/lib/server/classes_nocoops.jsa"; \
+    fi &&\
     timeout --preserve-status 60 dumb-init /container-entrypoint.sh foreground || [ $? -eq 143 ]
 
 FROM app AS final
