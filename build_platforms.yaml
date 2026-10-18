@@ -9,9 +9,17 @@ platforms:
     os: ubuntu
 
   - platform: amd64
-    runner: ubuntu-24.04
+    runner: ubuntu-26.04
     os: alpine
 
   - platform: arm64
-    runner: ubuntu-24.04-arm
+    runner: ubuntu-26.04-arm
     os: alpine
+
+  - platform: amd64
+    runner: ubuntu-26.04
+    os: altlinux
+
+  - platform: arm64
+    runner: ubuntu-26.04-arm
+    os: altlinux
