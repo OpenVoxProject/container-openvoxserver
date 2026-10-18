@@ -269,7 +269,7 @@ podman exec openvox r10k deploy environment -mv
 | --- | --- | --- |
 | Base | Ubuntu 26.04 | Alpine Linux 3.24 | Alt-linux sisyphus |
 | C library | glibc | musl, with `gcompat` installed for limited glibc compatibility | glibc |
-| `rugged` | Uses Ubuntu's `ruby-rugged` package because the rubygems version needs a newer `libgit2` | Builds the configured `rugged` gem during the image build with SSH support | Alt-linux `rubby-rugged` package |
+| `rugged` | Uses Ubuntu's `ruby-rugged` package because the rubygems version needs a newer `libgit2` | Builds the configured `rugged` gem during the image build with SSH support | `rubby-rugged` package |
 | `hocon` | gem v1.4.0 | gem v1.4.0 | distribution `hokon` gem packege in case of errors in JAVA_OPTS parsing by gem  |
 | other gems packages | - | - | gem-executable-hooks gem-rake-compiler gem-rake  |
 
