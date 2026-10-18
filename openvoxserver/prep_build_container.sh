@@ -23,6 +23,7 @@ install -d "/opt/puppetlabs/server/data" -m 0775
 install -d "/opt/puppetlabs/server/data/puppetserver" -m 0770
 install -d "/opt/puppetlabs/server/data/puppetserver/jars" -m 0700
 install -d "/opt/puppetlabs/server/data/puppetserver/jruby-gems" -m 0755
+install -d "/opt/puppetlabs/server/data/puppetserver/var" -m 0770
 install -d "/opt/puppetlabs/server/data/puppetserver/yaml" -m 0700
 install -d "/var/log/puppetlabs/puppetserver" -m 0700
 install -d "/var/run/puppetlabs/puppetserver" -m 0755
