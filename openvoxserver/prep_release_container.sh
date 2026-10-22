@@ -158,6 +158,7 @@ for d in /etc/puppetlabs /var/log/puppetlabs /var/run/puppetlabs /opt/puppetlabs
   chmod -R g=u "$d"
   find "$d" -type d -exec chmod g+s {} +
 done
+chmod g=u /etc/passwd
 
 # the foreground starting script has this check before running the server:
 # [ "$EUID" = "$(id -u ${USER})" ]

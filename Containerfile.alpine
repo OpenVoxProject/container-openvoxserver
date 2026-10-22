@@ -131,6 +131,9 @@ COPY Containerfile.alpine /Containerfile
 
 RUN /prep_release_container.sh
 
+# Keep HOME and runtime-generated passwd entry by podman aligned.
+WORKDIR /opt/puppetlabs/server/data/puppetserver
+
 USER 64604:0
 
 # Create a CDS archive in a stage for faster class loading.

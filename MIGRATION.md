@@ -4,7 +4,7 @@
 
 The container runs with **group 0** and works under **any UID**.
 File access is granted exclusively through group 0, and the UID of files on mounted volumes does not matter.
-There is no `puppet` service account in the image anymore.
+There is no fixed `puppet` service account in the image anymore.
 
 For existing volumes, run once:
 
