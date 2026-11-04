@@ -17,7 +17,6 @@
   - [Persistence](#persistence)
     - [Permissions](#permissions)
       - [Rootless Podman](#rootless-podman)
-      - [Docker](#docker)
   - [How to deploy OpenVox/Puppet code](#how-to-deploy-openvoxpuppet-code)
     - [✅ Preferred way to deploy your code](#-preferred-way-to-deploy-your-code)
     - [🔥 Not recommended way, but often used, pattern from the non-container world](#-not-recommended-way-but-often-used-pattern-from-the-non-container-world)
@@ -184,18 +183,34 @@ services:
 
 ### Permissions
 
+The container runs with the root group (GID 0) and works under any UID. Access to mounted volumes is granted through group 0 only, the UID of the files does not matter. Prepare bind mounts once using:
+
+```shell
+chgrp -R 0 <dir> && chmod -R g+rwX <dir>
+```
+
+Applications may create files with restrictive modes despite the umask.
+When changing UIDs, group permissions on persisted volumes may need to be reapplied.
+
+On Kubernetes/OpenShift, use `fsGroup: 0` in the pod's `securityContext` to grant group-0 access and prepare supported volumes.
+Alternatively, use `supplementalGroups: [0]` when volumes are already group-0 writable.
+
 #### Rootless Podman
 
-When using rootless Podman, the OpenVox Server process runs directly as the non-root `puppet` user (UID 64604) with the root group (GID 0).
-This can lead to permission issues with bind mount volumes, which you may want to use for the OpenVox SSL and CA directories. For example:
+Apply the same fix inside the user namespace:
+
+```shell
+podman unshare chgrp -R 0 <dir> && podman unshare chmod -R g+rwX <dir>
+```
+
+For example for the OpenVox SSL and CA directories:
 
 ```shell
 -v ./openvoxserver-ssl:/etc/puppetlabs/puppet/ssl
 -v ./openvoxserver-ca:/etc/puppetlabs/puppetserver/ca
 ```
 
-By default the container will attempt to correct permissions. For a large number of files it may spend a long time at "Adjusting mounted CA directory ownership". This is normal.
-If this still runs into permissions issues please check selinux and related security layers. You can relabel the host directory using the `:Z` flag:
+If you still run into permission issues please check selinux and related security layers. You can relabel the host directory using the `:Z` flag:
 
 ```shell
 -v ./openvoxserver-ca:/etc/puppetlabs/puppetserver/ca:Z
@@ -210,10 +225,6 @@ If you're starting from scratch we instead recommend using a named volume. For e
 ```
 
 Permissions are managed for you, and from there the volume can be migrated using `podman volume export` and `podman volume import` commands.
-
-#### Docker
-
-Docker always runs rootfull, and does not need permissions adjustments.
 
 ## How to deploy OpenVox/Puppet code
 
