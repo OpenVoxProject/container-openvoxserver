@@ -174,6 +174,11 @@ for d in /etc/puppetlabs /var/log/puppetlabs /var/run/puppetlabs /opt/puppetlabs
 done
 chown puppet /run/openvox
 
+# Non-packaged openvox doesn't include a bundled trust store, so we manually add one for the include_system_store option
+mkdir -p /opt/puppetlabs/puppet/ssl
+ln -s /etc/ssl/certs/ca-certificates.crt /opt/puppetlabs/puppet/ssl/cert.pem
+ln -s /etc/ssl/certs/java/cacerts /opt/puppetlabs/puppet/ssl/puppet-cacerts
+
 # the foreground starting script has this check before running the server:
 # [ "$EUID" = "$(id -u ${USER})" ]
 # simply calling `id -u` results in the UID of the current user and the check will pass
