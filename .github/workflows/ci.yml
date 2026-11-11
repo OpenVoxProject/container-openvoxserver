@@ -75,6 +75,20 @@ jobs:
           docker run --rm -v "$PWD/tests:/tests:ro,Z" --entrypoint puppet ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }} catalog compile --manifest /tests/simple_catalog.pp --render-as json > catalog.json
           grep -q '"type":"Host"' catalog.json
           grep -q '"type":"Cron"' catalog.json
+          docker run --rm -i --user 0 --entrypoint bash "ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }}" -eo pipefail -s <<'CHECK'
+          find /etc/puppetlabs /var/log/puppetlabs /var/run/puppetlabs /opt/puppetlabs /run/openvox \
+            -exec stat -c '%g %a %n' {} + |
+          awk '
+            {
+              mode = substr($2, length($2) - 2)
+              if ($1 != 0 || substr(mode, 1, 1) != substr(mode, 2, 1)) {
+                print "Permission mismatch:", $0
+                failed = 1
+              }
+            }
+            END { exit failed }
+          '
+          CHECK
 
   tests:
     name: Test suite
