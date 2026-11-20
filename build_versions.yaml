@@ -4,7 +4,7 @@ include:
     # renovate: datasource=custom.voxpupuli-artifacts depName=openvox-server
     server_version: "8.18.0"
     # renovate: datasource=custom.voxpupuli-artifacts depName=openvoxdb
-    db_version: "8.18.0"
+    db_version: "8.18.1"
     # TODO: remove rubgems, they should be managed by the Containerfiles.
     # renovate: datasource=rubygems depName=openvox
     rubygem_openvox: "8.34.0"
