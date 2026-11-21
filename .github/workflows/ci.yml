@@ -75,6 +75,7 @@ jobs:
           docker run --rm -v "$PWD/tests:/tests:ro,Z" --entrypoint puppet ci/openvoxserver:${{ matrix.server_version }}-${{ matrix.os }}-${{ matrix.platform }} catalog compile --manifest /tests/simple_catalog.pp --render-as json > catalog.json
           grep -q '"type":"Host"' catalog.json
           grep -q '"type":"Cron"' catalog.json
+          bash tests/build_sequence_test.sh
 
   tests:
     name: Test suite
