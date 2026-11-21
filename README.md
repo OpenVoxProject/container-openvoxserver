@@ -85,26 +85,41 @@ Alpine images use the `-alpine` suffix.
 
 | Tag | Example | Description |
 | --- | --- | --- |
-| `<openvox.version>-v<container.version>` | `8.13.0-v1.2.3` | Immutable Ubuntu container release |
-| `<openvox.version>-v<container.version>-alpine` | `8.13.0-v1.2.3-alpine` | Immutable Alpine container release |
-| `<openvox.version>` | `8.13.0` | Latest build for an OpenVox version, using Ubuntu |
-| `<openvox.version>-alpine` | `8.13.0-alpine` | Latest Alpine build for an OpenVox version |
+| `<openvox.version>-<build>` | `8.18.0-1` | Immutable Ubuntu build |
+| `<openvox.version>-<build>-alpine` | `8.18.0-1-alpine` | Immutable Alpine build |
+| `<openvox.version>` | `8.18.0` | Latest build for an OpenVox version, using Ubuntu |
+| `<openvox.version>-alpine` | `8.18.0-alpine` | Latest Alpine build for an OpenVox version |
 | `<openvox.major>` | `8` | Latest build for an OpenVox major version, using Ubuntu |
 | `<openvox.major>-alpine` | `8-alpine` | Latest Alpine build for an OpenVox major version |
 | `latest` | `latest` | Latest Ubuntu build from the `main` branch |
 | `latest-alpine` | `latest-alpine` | Latest Alpine build from the `main` branch |
 
-Builds from the `main` branch are additionally tagged as
-`<openvox.version>-main` and `<openvox.version>-main-alpine`.
+The OpenVox version describes the server version contained in the image.
+The build number counts the images published for that OpenVox version.
+It starts at `0` and goes up by one every time the `main` branch publishes an image,
+whether or not the OpenVox version changed: a newer base image, Java or OpenVoxDB termini package,
+or a change to the container scripts, all produce a new build number.
+A new OpenVox version starts again at `0`.
+The Ubuntu and Alpine images of the same build share its number.
 
-Example using an immutable container release:
+Images are only published from the `main` branch.
+Git tags and GitHub releases of this repository do not publish images.
+
+Example using an immutable build:
 
 ```shell
-podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code/ ghcr.io/openvoxproject/openvoxserver:8.13.0-v1.2.3
+podman run --name openvox --hostname openvox -v ./code:/etc/puppetlabs/code/ ghcr.io/openvoxproject/openvoxserver:8.18.0-1
 ```
 
-The OpenVox version describes the server version contained in the image.
-The container version follows semantic versioning and describes changes to the container image independently of the OpenVox version.
+Each build records the commit it was built from in the `org.opencontainers.image.revision` annotation of its image index.
+Builds published before this annotation was added, such as `8.18.0-0` and `8.18.0-1`, do not carry it.
+
+```shell
+skopeo inspect --raw docker://ghcr.io/openvoxproject/openvoxserver:<openvox.version>-<build> | jq -r '.annotations["org.opencontainers.image.revision"]'
+```
+
+The `<openvox.version>-v<container.version>` and `<openvox.version>-main` tags used by earlier builds are no longer updated.
+See the [migration document](MIGRATION.md) if you use them.
 
 ## Configuration
 
