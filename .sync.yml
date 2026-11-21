@@ -49,8 +49,17 @@
   renovate_package_rules:
     - matchDatasources:
         - custom.voxpupuli-artifacts
-      allowedVersions: '/^8\./'
       extractVersion: '^(?<version>\d+\.\d+\.\d+)/$'
+    # Each OpenVox major release has its own build line in build_versions.yaml,
+    # and the Containerfile defaults are pinned to one of those lines. Keep every
+    # pinned version within its major; new majors get a new build line by hand.
+    - matchPackageNames:
+        - openvox
+        - openvox-server
+        - openvoxdb
+      matchUpdateTypes:
+        - major
+      enabled: false
 .github/workflows/ci.yml:
   build_job_name: 'Build OpenVox ${{ matrix.release }} ${{ matrix.os }} / ${{ matrix.platform }} CI container'
   test_commands:
