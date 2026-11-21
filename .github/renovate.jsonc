@@ -76,8 +76,18 @@
       "matchDatasources": [
         "custom.voxpupuli-artifacts"
       ],
-      "allowedVersions": "/^8\\./",
       "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)/$"
+    },
+    {
+      "matchPackageNames": [
+        "openvox",
+        "openvox-server",
+        "openvoxdb"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
     },
     {
       // Do not require dashboard approval before creating updates.
