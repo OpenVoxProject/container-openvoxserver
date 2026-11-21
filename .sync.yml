@@ -72,26 +72,28 @@
     - 'ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-${{ matrix.os }}-${{ matrix.platform }}'
   publish_manifest_matrix_command: bash matrix.sh tag
   publish_manifest_steps:
-    - name: Create ref-specific Ubuntu manifest
+    - name: Create build manifest
+      if: "${{ github.ref == 'refs/heads/main' }}"
       commands:
+        - 'all_tags=$(skopeo list-tags docker://ghcr.io/openvoxproject/openvoxserver)'
+        - 'last_tag=$(echo "$all_tags" | jq -r ".Tags[]" | grep -E "^${{ matrix.server_version }}-[0-9]+$" | cut -d- -f2 | sort -n | tail -1)'
+        - if [ -z "$last_tag" ]; then next_sequence=0; else next_sequence=$((last_tag + 1)); fi
         - >-
           docker buildx imagetools create
-          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-$next_sequence
           -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}
           -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}
-          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-$next_sequence
           -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}
           -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
-    - name: Create ref-specific Alpine manifest
-      commands:
         - >-
           docker buildx imagetools create
-          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine
+          -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-$next_sequence-alpine
           -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-alpine
           -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-alpine
-          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-${{ github.ref_name }}-alpine
+          -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-$next_sequence-alpine
           -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-alpine
           -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-alpine
           ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64
