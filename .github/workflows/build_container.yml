@@ -110,11 +110,21 @@ jobs:
       - name: Create build manifest
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          all_tags=$(skopeo list-tags docker://ghcr.io/openvoxproject/openvoxserver)
-          last_tag=$(echo "$all_tags" | jq -r ".Tags[]" | grep -E "^${{ matrix.server_version }}-[0-9]+$" | cut -d- -f2 | sort -n | tail -1)
-          if [ -z "$last_tag" ]; then next_sequence=0; else next_sequence=$((last_tag + 1)); fi
-          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-$next_sequence -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }} -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }} -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-$next_sequence -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }} -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }} ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
-          docker buildx imagetools create -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-$next_sequence-alpine -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-alpine -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-$next_sequence-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-alpine ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
+          set -euo pipefail
+          version="${{ matrix.server_version }}"
+          ghcr_tags=$(skopeo list-tags docker://ghcr.io/openvoxproject/openvoxserver)
+          hub_tags=$(skopeo list-tags docker://docker.io/voxpupuli/openvoxserver)
+          last_tag=$(echo "$ghcr_tags" "$hub_tags" | jq -r ".Tags[]" | { grep -E "^${version//./\\.}-[0-9]+$" || true; } | cut -d- -f2 | sort -n | tail -1)
+          this_build=$(skopeo inspect --format "{{.Digest}}" docker://ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64)
+          if [ -z "$last_tag" ]; then
+            next_sequence=0
+          else
+            last_index=$(skopeo inspect --raw "docker://ghcr.io/openvoxproject/openvoxserver:$version-$last_tag" || true)
+            if grep -qF "$this_build" <<<"$last_index"; then next_sequence=$last_tag; else next_sequence=$((last_tag + 1)); fi
+          fi
+          docker buildx imagetools create --annotation "index:org.opencontainers.image.revision=${{ github.sha }}" -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-$next_sequence -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }} -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }} -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-$next_sequence -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }} -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }} ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-ubuntu-amd64
+          docker buildx imagetools create --annotation "index:org.opencontainers.image.revision=${{ github.sha }}" -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-$next_sequence-alpine -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.server_version }}-alpine -t ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-$next_sequence-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.server_version }}-alpine -t docker.io/voxpupuli/openvoxserver:${{ matrix.release }}-alpine ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-arm64 ghcr.io/openvoxproject/openvoxserver:${{ matrix.release }}-${{ github.sha }}-alpine-amd64
+          echo "Published $version-$next_sequence and $version-$next_sequence-alpine from ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Update floating Ubuntu tag
         if: ${{ github.ref == 'refs/heads/main' && matrix.release=='9' }}
