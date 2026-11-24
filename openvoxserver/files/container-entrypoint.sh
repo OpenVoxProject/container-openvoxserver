@@ -11,6 +11,9 @@ set -o nounset  # exit on use of undeclared var, use `${possibly_undefined-}` to
                 # `: ${possibly_undefined_or_empty:=default}` will also replace an empty (but declared) value
 # set -o xtrace
 
+# Keep normally created files group-writable.
+umask 0002
+
 PATH=$PATH:/opt/puppetlabs/puppet/lib/ruby/vendor_gems/bin:/opt/puppetlabs/server/data/puppetserver/vendored-jruby-gems/bin/
 
 pid=0
